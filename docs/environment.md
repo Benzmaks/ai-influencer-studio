@@ -1,10 +1,10 @@
 # Development environment
 
-Phase 1 is implemented on the `phase-1-foundation` branch. The reproducible commands, tested versions, migration constraints and troubleshooting are in [development.md](development.md). No paid AI credentials are required. Production deployment remains out of scope.
+Phases 1–5 are merged. Phase 6 Video Studio is implemented for review on `phase-6-video-studio`. The reproducible commands, tested versions, migration constraints and troubleshooting are in [development.md](development.md). No paid AI credentials are required. Production deployment remains out of scope.
 
 ## Runtime and dependencies
 
-Node 24.19.0/npm, Next.js 16.4.3 App Router, React 19.3.1, TypeScript 5.9.3, Prisma client/CLI 6.19.3, native Prisma engines (with matching pg adapter 6.19.3 retained only for an explicitly experimental local query-engine path), PostgreSQL 17.6 and Redis 7.4.6. Auth.js 5.0.0-beta.32 uses JWT credentials sessions in development. Zod validates inputs, bcrypt hashes local passwords, Vitest and Playwright validate behavior. BullMQ image workers/outbox are implemented in Phase 4; Redis is required for image generation. Native Prisma is required for migrations.
+Node 24.19.0/npm, Next.js 16.4.3 App Router, React 19.3.1, TypeScript 5.9.3, Prisma client/CLI 6.19.3, native Prisma engines (with matching pg adapter 6.19.3 retained only for an explicitly experimental local query-engine path), PostgreSQL 17.6 and Redis 7.4.6. Auth.js 5.0.0-beta.32 uses JWT credentials sessions in development. Zod validates inputs, bcrypt hashes local passwords, Vitest and Playwright validate behavior. BullMQ media workers/outbox handle images and Phase 6 per-shot video previews; Redis is required for asynchronous media generation. Native Prisma is required for migrations.
 
 `compose.yaml` starts loopback-bound PostgreSQL/Redis with health checks and retained data volumes. Existing managed services can be selected instead. Never use the sample Compose password in production. Local private asset files live under `.local/assets`; the S3-compatible production interface is defined but its transport is planned.
 
@@ -20,20 +20,20 @@ Use `npm run env:init` or copy `.env.example` to an ignored `.env` and securely 
 | `AUTH_URL`                                              | Actual application/browser origin; used for callbacks and mutation Origin validation.                                                   |
 | `AUTH_MODE`                                             | `development` only for non-production local login; `disabled` for production build/start. Production OIDC is not implemented.           |
 | `DEV_AUTH_EMAIL`, `DEV_AUTH_PASSWORD`                   | Non-production seed/login values; password 12–128 characters. Seed never overwrites existing accounts.                                  |
-| `LANGUAGE_PROVIDER`, `IMAGE_PROVIDER`, `VIDEO_PROVIDER` | `mock` only in Phase 1. Unknown providers fail configuration validation.                                                                |
-| `STORAGE_DRIVER`                                        | `local` only in Phase 1; unsupported drivers fail validation.                                                                           |
+| `LANGUAGE_PROVIDER`, `IMAGE_PROVIDER`, `VIDEO_PROVIDER` | `mock` only in the current implementation. Unknown providers fail configuration validation.                                                                |
+| `STORAGE_DRIVER`                                        | `local` only in the current implementation; unsupported drivers fail validation.                                                                           |
 | `LOCAL_STORAGE_DIR`                                     | Private writable persistent directory, never inside `public/`. Defaults to `.local/assets`.                                             |
 | `STUDIO_PRISMA_ENGINE`                                  | `classic` is the supported default. `experimental` opts into the unsupported local WASM/adapter path and is forbidden in production/CI. |
 | `PRISMA_CLIENT_ENGINE_TYPE`                             | `library` for native default/releases; `client` only for local experimental generation. Never deploy the experimental generated client. |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE`                        | Optional system Chromium path for local tests; CI installs the matching Playwright browser.                                             |
 
-S3 credentials/selectors, real AI provider keys, production OIDC configuration and generation retry tuning are future configuration requirements when those features are implemented. They are not current required inputs. No `fixture-demo` is implemented: unavailable infrastructure produces explicit errors rather than silent fallback. Mock providers replace external AI only; project data and authorization use actual PostgreSQL.
+S3 credentials/selectors, real AI provider keys, production OIDC configuration and paid-provider retry tuning are future configuration requirements when those features are implemented. They are not current required inputs. No `fixture-demo` is implemented: unavailable infrastructure produces explicit errors rather than silent fallback. Mock providers replace external AI only; project data and authorization use actual PostgreSQL.
 
 ## Startup and health
 
 See [development.md](development.md) for the full sequence. After `npm ci`, environment initialization and infrastructure startup, run `db:generate`, `db:migrate`, `db:seed`, `health`, then `dev`. `npm run health` validates configuration, database connectivity/schema, Redis PING and a private filesystem write/readiness probe. Authenticated users can inspect `/settings` or `/api/health`. Unauthenticated clients cannot inspect infrastructure diagnostics.
 
-Processes must restart in future cloud tasks. Installed dependencies, database volumes and local files are distinct from running web/container processes. No worker startup is required yet. The build command is `STUDIO_PRISMA_ENGINE=classic PRISMA_CLIENT_ENGINE_TYPE=library AUTH_MODE=disabled npm run build`; authenticated preview uses development mode and `npm run dev`.
+Processes must restart in future cloud tasks. Installed dependencies, database volumes and local files are distinct from running web/container processes. Run `npm run worker` in a separate process for images/videos; the private Mac starter manages it automatically. The build command is `STUDIO_PRISMA_ENGINE=classic PRISMA_CLIENT_ENGINE_TYPE=library AUTH_MODE=disabled npm run build`; authenticated preview uses development mode and `npm run dev`.
 
 ## Codex Cloud
 
