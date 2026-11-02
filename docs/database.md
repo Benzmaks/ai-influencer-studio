@@ -11,3 +11,7 @@ Publication claims the exact active draft revision and appends the character/ver
 `npm run test:migrations` creates an isolated database, applies the original Phase 1 migration only, populates character snapshots and project membership, upgrades through all current migrations, then checks original row/migration preservation and repeated deployment. It also tests snapshot update prevention. Only the uniquely named disposable database and test-owned temporary configuration are removed; CREATE DATABASE privileges are required for this check.
 
 Before applying to a populated local installation, stop the web app and take a private PostgreSQL dump and source/environment backup. Run db:generate and db:migrate, retaining existing migration history and credentials, then restart and validate the application. The Monterey preview updater automates these steps using the existing private cluster; backups remain local and must not be shared. No actual Mac backup restoration is claimed.
+
+## Phase 3 scenes
+
+`202611020003_scenes` adds project-shared Scene and immutable SceneVersion records. Exact character references use same-project composite foreign keys. Every draft/ready save appends a version in the transaction that advances Scene.revision; stale writes fail. Original character and draft tables/migrations are untouched. SQL blocks updating scene snapshots. See prompt-engine.md for persistence semantics and phase-3-validation.md for populated Phase 1/2 upgrade evidence.
