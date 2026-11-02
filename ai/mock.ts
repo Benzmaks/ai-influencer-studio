@@ -10,6 +10,7 @@ import type {
   ProviderCapabilities,
   Operation,
 } from './contracts';
+import { mockRaster } from './mock-raster';
 import { requireCapability } from './contracts';
 async function simulate(options: ProviderContext = {}) {
   options.signal?.throwIfAborted();
@@ -47,6 +48,8 @@ export const mockLanguage: LanguageModelProvider = {
   },
 };
 const imageCapabilities: ProviderCapabilities = {
+  aspectRatios: ['1:1', '4:5', '9:16', '16:9'],
+  variationStrengths: ['subtle', 'balanced', 'bold'],
   id: 'mock-image',
   mock: true,
   models: ['studio-sample-v1'],
@@ -60,16 +63,28 @@ async function image(
 ): Promise<MediaOutput[]> {
   requireCapability(imageCapabilities, operation, input);
   await simulate(options);
+  const delay = Number(process.env.MOCK_IMAGE_DELAY_MS ?? 0);
+  if (input.aspectRatio && Number.isFinite(delay) && delay > 0)
+    await new Promise((resolve) => setTimeout(resolve, Math.min(delay, 10000)));
+  options?.signal?.throwIfAborted();
   return Promise.all(
     Array.from({ length: input.count }, async (_, i) => {
       const sample = (((input.seed + i) % 8) + 8) % 8;
-      const bytes = await readFile(
-        path.join(process.cwd(), `ai/fixtures/mock-image-${sample}.png`),
-      );
+      const bytes = input.aspectRatio
+        ? mockRaster(
+            input.seed + i,
+            input.aspectRatio,
+            input.prompt + '\n' + (input.negativePrompt ?? ''),
+            input.variationStrength ?? 'balanced',
+            input.source,
+          )
+        : await readFile(path.join(process.cwd(), `ai/fixtures/mock-image-${sample}.png`));
       return {
         bytes: Uint8Array.from(bytes),
         mimeType: 'image/png',
-        label: 'Mock output · illustrative sample, not generated photography',
+        label: input.aspectRatio
+          ? 'Mock output · procedural test pattern, not AI photography'
+          : 'Mock output · illustrative sample, not generated photography',
         mock: true as const,
         seed: input.seed + i,
       };
@@ -113,6 +128,6 @@ export function providerRegistry(
   },
 ) {
   for (const value of [config.LANGUAGE_PROVIDER, config.IMAGE_PROVIDER, config.VIDEO_PROVIDER])
-    if (value && value !== 'mock') throw new Error('Only mock providers are available in Phase 1.');
+    if (value && value !== 'mock') throw new Error('Only mock providers are enabled.');
   return { language: mockLanguage, image: mockImage, video: mockVideo };
 }

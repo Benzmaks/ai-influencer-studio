@@ -17,6 +17,10 @@ Phase 4 must reference an exact SceneVersion and its exact CharacterVersion, che
 
 ## Migration and reproducibility
 
-Apply `202611020003_scenes` through `npm run db:migrate`, never reset a populated database. It creates only Scene/SceneVersion, indexes, constraints and an immutable-update rule. Do not modify or squash the original migrations. Regenerate Prisma before restarting the server. The default supported path remains Prisma CLI/client 6.19.3 native library/classic engine; the old pg-adapter 7 experiment is restricted to explicitly opted-in local development and is not a supported production configuration.
+Apply `202611020003_scenes` through `npm run db:migrate`, never reset a populated database. It creates only Scene/SceneVersion, indexes, constraints and an immutable-update rule. Do not modify or squash the original migrations. Regenerate Prisma before restarting the server. The default supported path remains Prisma CLI/client 6.19.3 native library/classic engine; Phase 4 aligns the optional local query adapter to 6.19.3; its WASM schema engine is not a supported migration configuration.
 
 Tests cover deterministic concepts/prompts, adaptive negatives, protected anchors, temporary and permanent override routing, scene history, optimistic concurrency, role and project boundaries, SQL immutability, migration upgrades and desktop/mobile workflows.
+
+## Implemented Phase 4 boundary
+
+The image-only branch is implemented: authorized effective inputs → transactional Generation/slots/outbox → Redis/BullMQ delivery → separately running worker → deterministic labeled mock PNG → private local storage → fenced result commit → authorized polling/gallery/download. Generation references exact SceneVersion and CharacterVersion snapshots and recomputes continuity/prompts before acceptance. Video dispatch and editing remain unimplemented. See image-generation.md for the working lifecycle, quotas, cancellation, retries and recovery limitations. Earlier Future generation boundary text describes the original Phase 3 boundary, now realized for mock images only.

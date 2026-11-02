@@ -2,7 +2,14 @@ name: Studio checks
 on:
   pull_request:
   push:
-    branches: [main, phase-1-foundation, phase-2-character-dna, phase-3-scene-prompt-engine]
+    branches:
+      [
+        main,
+        phase-1-foundation,
+        phase-2-character-dna,
+        phase-3-scene-prompt-engine,
+        phase-4-image-generation,
+      ]
 permissions:
   contents: read
 jobs:
@@ -71,7 +78,12 @@ jobs:
           AUTH_MODE: disabled
       - run: npm run test:production
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - name: Browser workflows with mock image worker
+        run: |
+          MOCK_IMAGE_DELAY_MS=150 npm run worker > "$RUNNER_TEMP/studio-worker.log" 2>&1 &
+          STUDIO_WORKER_PID=$!
+          trap 'kill "$STUDIO_WORKER_PID" 2>/dev/null || true' EXIT
+          npm run test:e2e
       - uses: actions/upload-artifact@v5
         if: failure()
         with:

@@ -78,7 +78,7 @@ Before production select the OIDC provider and deployment host, initial paid pro
 
 ## PR #1 compatibility review
 
-The supported default now uses the aligned Prisma 6.19.3 CLI/client native engines, with no pg adapter at runtime or in migrations. The mixed-major pg adapter 7.10.1 / Prisma 6 WASM path is a local-only, explicitly unsupported opt-in and is forbidden in production and CI. See [phase-1-review.md](phase-1-review.md) for source evidence, the migration-preservation procedure and hosted CI findings. No migration SQL, data model ownership or historical snapshots were changed by this configuration review.
+The supported default now uses the aligned Prisma 6.19.3 CLI/client native engines, with no pg adapter at runtime or in migrations. Phase 4 aligns pg adapter 6.19.3 with Prisma client/CLI 6.19.3 for the local query-engine experiment; the WASM configuration remains forbidden in production and CI and cannot serve as the supported migration engine. See [phase-1-review.md](phase-1-review.md) for source evidence, the migration-preservation procedure and hosted CI findings. No migration SQL, data model ownership or historical snapshots were changed by this configuration review.
 
 ## Phase 2 character creator
 
@@ -88,3 +88,8 @@ The Character module now includes the ten-step creator, private resumable drafts
 ## Phase 3 implementation
 
 `features/scenes` validates choices and serves authorized scene repositories/transactions. `ai/continuity-engine`, `ai/realism-engine`, and separate positive/negative modules under `ai/prompt-engine` prepare deterministic labeled mock prompts from pinned Character DNA snapshots. `/scenes`, `/scenes/new` and `/scenes/[id]` replace the scene placeholder; image/video/job modules remain Planned. JSON snapshots live in PostgreSQL, not media storage. No worker or paid provider is introduced. See prompt-engine.md and ai-pipeline.md.
+
+
+## Phase 4 image production
+
+`features/generation` owns strict input validation, project-scoped CRUD, effective immutable request references, idempotency and transactional quotas/outbox creation. `workers/run.ts` runs BullMQ consumers and periodic PostgreSQL outbox repair outside HTTP. `workers/processor.ts` fences commits with durable leases, writes private storage and preserves successful slots through recovery/retry. `ai/mock-raster.ts` produces deterministic labeled PNG test patterns; real adapters remain disabled. Image/asset APIs enforce server authorization and checksum-verified downloads. See image-generation.md.

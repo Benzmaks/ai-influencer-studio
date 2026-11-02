@@ -19,13 +19,14 @@
     "db:seed": "tsx database/seed.ts",
     "health": "tsx scripts/health.ts",
     "env:init": "tsx scripts/init-env.ts",
-    "format:check": "prettier --check app components lib features ai storage database tests scripts *.ts *.mts *.mjs",
+    "format:check": "prettier --check app components lib features ai workers storage database tests scripts *.ts *.mts *.mjs",
     "test:production": "tsx scripts/check-production-auth.ts",
-    "test:migrations": "tsx scripts/check-migrations.ts"
+    "test:migrations": "tsx scripts/check-migrations.ts",
+    "worker": "tsx workers/run.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",
-    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/adapter-pg": "6.19.3",
     "@prisma/client": "6.19.3",
     "bcryptjs": "3.0.3",
     "bullmq": "6.5.3",

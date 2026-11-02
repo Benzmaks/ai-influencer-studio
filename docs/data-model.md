@@ -76,3 +76,8 @@ CharacterDraft is implemented with private creator/project scope, optional targe
 ## Implemented Phase 3 entities
 
 Scene belongs to a project and stores mutable title/status plus optimistic revision. SceneVersion is an immutable append-only snapshot with a unique scene/versionNumber, full choices, compiled prompt JSON (including continuity and rule version), author and creation time. It has composite foreign keys to the same-project Scene and exact same-project CharacterVersion; a changed current character never repoints prior scenes. Scene status is draft or ready; ready means continuity allows prompt preparation, not media generation. The highest versionNumber is current, advanced atomically with Scene.revision. Project members can read; only owners/editors can write. Draft scenes are shared within the project, unlike private per-author character drafts.
+
+
+## Implemented Phase 4 entities
+
+Generation belongs to a project, pins exact CharacterVersion and SceneVersion, and stores effective inputs/prompts/realism/provider/model/seed/settings with a unique project idempotency key and request hash. Status/progress, cancellation, retry and fenced leases are mutable lifecycle fields. GenerationOutbox is one-to-one and created in the same transaction; delivered timestamps enable retry/repair. ImageAsset is a unique generation/index slot with pending/completed/failed/cancelled status, bounded attempts, immutable-by-service object key/checksum/metadata, separate review state and optional same-project sourceAssetId. Composite FKs enforce project boundaries. Source originals are preserved; collections, editing and full asset version trees are not implemented.

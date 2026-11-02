@@ -22,6 +22,12 @@ function client() {
 // A release must generate its own native client; never deploy a local experimental generated client.
 export const db = new Proxy({} as PrismaClient, {
   get(_target, key) {
+    if (key === '$disconnect')
+      return async () => {
+        const existing = globalDb.prisma;
+        globalDb.prisma = undefined;
+        if (existing) await existing.$disconnect();
+      };
     const instance = client();
     const value = Reflect.get(instance, key);
     return typeof value === 'function' ? value.bind(instance) : value;

@@ -126,8 +126,23 @@ async function main() {
     await pool.query(
       `INSERT INTO "CharacterDraft" (id,"projectId","createdBy",answers,step,"updatedAt") VALUES ('migration-draft','migration-project','migration-owner','{"name":"Unfinished DNA"}'::jsonb,3,NOW())`,
     );
+    const third = '202611020003_scenes';
+    await mkdir(path.join(upgradeRoot, 'migrations', third), { recursive: true });
+    await copyFile(
+      path.resolve('prisma/migrations', third, 'migration.sql'),
+      path.join(upgradeRoot, 'migrations', third, 'migration.sql'),
+    );
+    await migrate(configPath);
+    await pool.query(
+      `INSERT INTO "Scene" (id,"projectId",title,"updatedAt") VALUES ('migration-scene','migration-project','Existing scene',NOW())`,
+    );
+    await pool.query(
+      `INSERT INTO "SceneVersion" (id,"projectId","sceneId","versionNumber","characterId","characterVersionId",choices,prompt,"createdBy") VALUES ('migration-scene-version','migration-project','migration-scene',1,'migration-character','migration-version-2','{"title":"Preserve scene"}'::jsonb,'{"ready":true}'::jsonb,'migration-owner')`,
+    );
     async function contents() {
       return {
+        scenes: (await pool!.query('SELECT * FROM "Scene" ORDER BY id')).rows,
+        sceneVersions: (await pool!.query('SELECT * FROM "SceneVersion" ORDER BY id')).rows,
         drafts: (await pool!.query('SELECT * FROM "CharacterDraft" ORDER BY id')).rows,
         versions: (await pool!.query('SELECT * FROM "CharacterVersion" ORDER BY id')).rows,
         characters: (await pool!.query('SELECT * FROM "Character" ORDER BY id')).rows,
@@ -143,6 +158,12 @@ async function main() {
       upgraded.drafts,
       beforeUpgrade.drafts,
       'Upgrade preserves incomplete DNA drafts.',
+    );
+    assert.deepEqual(upgraded.scenes, beforeUpgrade.scenes, 'Scene records preserved.');
+    assert.deepEqual(
+      upgraded.sceneVersions,
+      beforeUpgrade.sceneVersions,
+      'Scene version snapshots preserved.',
     );
     assert.deepEqual(
       upgraded.versions,
@@ -160,7 +181,7 @@ async function main() {
       'Upgrade preserves project memberships.',
     );
     assert.deepEqual(
-      upgraded.history.filter((row) => [first, second].includes(row.migration_name)),
+      upgraded.history.filter((row) => [first, second, third].includes(row.migration_name)),
       beforeUpgrade.history,
       'Original migration history is unchanged.',
     );
@@ -184,7 +205,7 @@ async function main() {
     assert.equal(update.rowCount, 0);
     assert.deepEqual(await contents(), original, 'Original snapshots must remain immutable.');
     console.log(
-      'PASS: Phase 1-to-Phase 2-to-current upgrade, preserved DNA drafts, migration checksums, populated redeployment, canonical pointer, membership and immutable snapshots verified in an isolated database.',
+      'PASS: Phase 1-to-Phase 2-to-Phase 3-to-current upgrade, preserved DNA drafts, migration checksums, populated redeployment, canonical pointer, membership and immutable snapshots verified in an isolated database.',
     );
   } finally {
     await pool?.end();
