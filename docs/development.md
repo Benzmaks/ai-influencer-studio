@@ -38,11 +38,11 @@ PostgreSQL and Redis use persistent named Compose volumes. `docker compose down`
 
 ## Database and migration decisions
 
-Pinned: Prisma client/CLI **6.19.3**, TypeScript **5.9.3**, and official PostgreSQL driver adapter **7.10.1**. The newer adapter is intentionally pinned: the v6 adapter failed PostgreSQL catalog-name decoding in WASM migrations and leaked pooled connections after rejected concurrent transactions. The pinned adapter/client combination passes type checks, migrations, concurrency tests and clean disconnects. Revalidate this compatibility when upgrading.
+Pinned: Prisma client/CLI **6.19.3** and TypeScript **5.9.3**. The supported default uses Prisma's native library query engine and native schema/migration engine, with no pg adapter passed to PrismaClient. CI explicitly selects `STUDIO_PRISMA_ENGINE=classic` and `PRISMA_CLIENT_ENGINE_TYPE=library`. Native engine downloads require verified access to `binaries.prisma.sh`.
 
-`prisma.config.ts` uses Prisma 6's **experimental JavaScript/WASM schema engine** with the official driver adapter. This preserves npm package integrity and avoids native binaries blocked by this cloud network. Client runtime uses the JavaScript engine as well. This is an explicit development choice and production-review risk, not a claim of production certification. Native CLI mode can be selected with `STUDIO_PRISMA_ENGINE=classic` when verified native engines and their destination are available; that alternative was not validated here.
+The dependency on pg adapter **7.10.1** is retained only for the explicit, unsupported local experiment needed on the restricted cloud machine. To opt in locally, set both `STUDIO_PRISMA_ENGINE=experimental` and `PRISMA_CLIENT_ENGINE_TYPE=client` in your private `.env`, then regenerate. This selects Prisma 6's unstable WASM schema engine and adapter 7; it is rejected in production and CI and is not upstream compatibility assurance. Do not deploy its generated client. A new release install must regenerate in classic/library mode. See [PR review and migration safety](phase-1-review.md).
 
-The initial SQL is generated from the Prisma model, wrapped in a transaction, and includes a PostgreSQL rewrite rule preventing updates to historical snapshots. The adapter migration path splits SQL statements on semicolons; do **not** add procedural/dollar-quoted migration bodies without first selecting and validating a compatible migration engine. Keep applied migrations immutable. Prisma's warning that schema `url` is ignored by the adapter is expected: both config and runtime explicitly use `DATABASE_URL`.
+Existing migration SQL is preserved byte-for-byte. Never reset a populated database to change engine configuration. The initial migration's transaction, constraints and snapshot update rule remain in force. The experimental adapter splits SQL on semicolons, so procedural migrations require the native path. The schema `url` warning is expected only under the experimental adapter; both config and runtime use `DATABASE_URL`.
 
 Development credentials use bcrypt hashes, Auth.js JWT sessions, and a development-mode guard in both login and production session handling. Auth tables are created for future integrations; JWT credentials sessions do not populate the Session table. Auth.js **5.0.0-beta.32** is pinned for Next.js 16 compatibility. Production OIDC integration remains a deployment gate.
 
@@ -54,22 +54,24 @@ npm run typecheck
 npm run format:check
 npm test
 npm run test:integration
-AUTH_MODE=disabled npm run build
+npm run test:migrations
+STUDIO_PRISMA_ENGINE=classic PRISMA_CLIENT_ENGINE_TYPE=library AUTH_MODE=disabled npm run build
 npm run test:production
 npm run test:e2e
 ```
 
 - Unit tests cover mock contracts, failure/progress/cancel handling, environment restrictions and private storage.
+- `test:migrations` requires PostgreSQL CREATE DATABASE privileges and operates only on a new uniquely named disposable database, verifying checksums and populated redeployment preservation.
 - Integration tests require PostgreSQL migrations. They create uniquely named users/projects, exercise roles, cross-project IDs, immutable snapshots, stale/concurrent writes, archiving, last-owner protection and real storage authorization, then delete only their own fixtures.
-- `test:production` starts the built app on port 3001 with development authentication disabled, submits configured development credentials, checks rejection/no session and verifies protected APIs return 401. That port must be free.
+- `test:production` starts the built app on port 3001 with development authentication disabled, submits configured development credentials, checks rejection/no session, revokes a previously signed development token and verifies protected APIs return 401. That port must be free.
 - Browser tests start/reuse the development server on port 3000, use seeded development credentials, and exercise desktop/mobile workflows. They leave clearly identifiable test-created projects/characters in the development account. Use a disposable database/account for CI. Install Chromium with `npx playwright install --with-deps chromium`. In this cloud machine, the tested alternative is `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e`.
 - Browser traces/screenshots are ignored local outputs under `test-results/`. CI retains failure artifacts for seven days; use non-sensitive test data.
 
-The production build must use `AUTH_MODE=disabled`. `AUTH_MODE=development` fails environment validation in a production process. `npm start` runs a production build, so Phase 1 intentionally offers no usable production sign-in. `npm run dev` is the supported authenticated preview. No development credential bypass is provided.
+The production build must use `AUTH_MODE=disabled STUDIO_PRISMA_ENGINE=classic PRISMA_CLIENT_ENGINE_TYPE=library`. `AUTH_MODE=development` fails environment validation in a production process. `npm start` runs a production build, so Phase 1 intentionally offers no usable production sign-in. `npm run dev` is the supported authenticated preview. No development credential bypass is provided.
 
 ## CI
 
-`.github/workflows/ci.yml` defines fresh PostgreSQL/Redis services, random masked test credentials, locked install, generated client, repeated migrations/seed, health, lint/type/format checks, unit/integration tests, production build, production-auth verification and desktop/mobile smoke tests. Local execution of these commands is recorded separately from remote GitHub Actions status. Creating the workflow does not establish a successful hosted run.
+`.github/workflows/ci.yml` defines fresh PostgreSQL/Redis services, random masked test credentials, locked install, generated client, repeated migrations/seed, health, lint/type/format checks, unit/integration tests, production build, production-auth verification and desktop/mobile smoke tests. CI uses only native Prisma engines, including migration-preservation tests. Local execution of these commands is recorded separately from remote GitHub Actions status. Creating the workflow does not establish a successful hosted run.
 
 ## Troubleshooting
 

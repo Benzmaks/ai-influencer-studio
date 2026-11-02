@@ -11,7 +11,7 @@ Status: Phase 1 application, database, development authentication, mock ports an
 - Server-side language, image and video provider adapters, selected through a registry. Mock adapters are the default and require no paid credentials.
 - Auth.js is the proposed authentication integration. Phase 1 uses a development-only credentials adapter with securely hashed seeded credentials and signed sessions; a production OIDC provider must be selected and validated before deployment. Development credentials must fail closed in production.
 
-Dependencies and the npm lockfile are pinned. The tested Prisma adapter combination, experimental migration mode and Auth.js beta are documented in [development.md](development.md); production approval remains a separate gate.
+Dependencies and the npm lockfile are pinned. The native Prisma default, isolated experimental development path and Auth.js beta are documented in [development.md](development.md); production approval remains a separate gate.
 
 ## Application modules
 
@@ -75,3 +75,7 @@ Every resource lookup and mutation must enforce project membership, including as
 Development targets one web process, one worker, PostgreSQL, Redis and local storage. Production requires a Node-compatible web host, a persistent worker host, managed database/Redis, private S3-compatible storage, TLS, backups and secret management. Do not assume a serverless web deployment can host BullMQ workers or preserve local assets.
 
 Before production select the OIDC provider and deployment host, initial paid providers/models, asset retention/deletion policy, quotas/budgets and operational backup targets. Initial mock development is not blocked by these choices. Repository contribution rules currently contain no direct-push restriction; server-enforced branch protection must still be respected.
+
+## PR #1 compatibility review
+
+The supported default now uses the aligned Prisma 6.19.3 CLI/client native engines, with no pg adapter at runtime or in migrations. The mixed-major pg adapter 7.10.1 / Prisma 6 WASM path is a local-only, explicitly unsupported opt-in and is forbidden in production and CI. See [phase-1-review.md](phase-1-review.md) for source evidence, the migration-preservation procedure and hosted CI findings. No migration SQL, data model ownership or historical snapshots were changed by this configuration review.

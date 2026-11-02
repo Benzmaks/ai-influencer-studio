@@ -5,6 +5,7 @@ import { compare } from 'bcryptjs';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { developmentLoginAllowed } from '@/lib/env';
+import { developmentTokenAllowed } from '@/lib/auth-policy';
 const credentialsSchema = z.object({ email: z.email(), password: z.string().min(12).max(128) });
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -29,14 +30,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        if (!developmentLoginAllowed()) return null;
         token.userId = user.id;
         token.developmentSession = true;
       }
-      return token;
+      return developmentTokenAllowed(token) ? token : null;
     },
     async session({ session, token }) {
-      if (session.user) session.user.id = typeof token.userId === 'string' ? token.userId : '';
-      if (process.env.NODE_ENV === 'production' && token.developmentSession) session.user.id = '';
+      if (session.user)
+        session.user.id =
+          developmentTokenAllowed(token) && typeof token.userId === 'string' ? token.userId : '';
       return session;
     },
   },

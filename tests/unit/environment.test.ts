@@ -33,4 +33,13 @@ describe('environment and production authentication boundary', () => {
     expect(() => readEnvironment({ ...base, IMAGE_PROVIDER: 'unknown' })).toThrow();
     expect(() => readEnvironment({ ...base, AUTH_SECRET: 'short' })).toThrow();
   });
+  it('rejects non-HTTP origins, credentials and callback paths', () => {
+    for (const AUTH_URL of [
+      'ftp://example.test',
+      'https://user:password@example.test',
+      'https://example.test/api/auth',
+      'https://example.test/?secret=value',
+    ])
+      expect(() => readEnvironment({ ...base, AUTH_URL })).toThrow('AUTH_URL');
+  });
 });

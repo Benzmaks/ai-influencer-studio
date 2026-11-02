@@ -20,7 +20,8 @@
     "health": "tsx scripts/health.ts",
     "env:init": "tsx scripts/init-env.ts",
     "format:check": "prettier --check app components lib features ai/*.ts storage database tests scripts *.ts *.mts *.mjs",
-    "test:production": "tsx scripts/check-production-auth.ts"
+    "test:production": "tsx scripts/check-production-auth.ts",
+    "test:migrations": "tsx scripts/check-migrations.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",

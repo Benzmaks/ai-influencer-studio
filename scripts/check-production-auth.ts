@@ -2,13 +2,21 @@ import 'dotenv/config';
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { request } from '@playwright/test';
+import { encode } from 'next-auth/jwt';
 async function main() {
   const origin = 'http://localhost:3001';
   const server = spawn(
     process.execPath,
     ['node_modules/next/dist/bin/next', 'start', '-p', '3001'],
     {
-      env: { ...process.env, NODE_ENV: 'production', AUTH_MODE: 'disabled', AUTH_URL: origin },
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        AUTH_MODE: 'disabled',
+        AUTH_URL: origin,
+        STUDIO_PRISMA_ENGINE: 'classic',
+        PRISMA_CLIENT_ENGINE_TYPE: 'library',
+      },
       stdio: 'ignore',
     },
   );
@@ -61,8 +69,32 @@ async function main() {
         'Production must not issue a session from development credentials.',
       );
       assert.equal((await context.get('/api/projects')).status(), 401);
+      const cookie = 'authjs.session-token';
+      const previousDevelopmentToken = await encode({
+        token: { userId: 'preexisting-development-user', developmentSession: true },
+        secret: process.env.AUTH_SECRET!,
+        salt: cookie,
+        maxAge: 3600,
+      });
+      await context.addCookies([
+        {
+          name: cookie,
+          value: previousDevelopmentToken,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: true,
+          sameSite: 'Lax',
+        },
+      ]);
+      const previousSession = await (await context.get('/api/auth/session')).json();
+      assert.ok(
+        !previousSession?.user,
+        'A previously signed development session must be revoked in production.',
+      );
+      assert.equal((await context.get('/api/projects')).status(), 401);
+
       console.log(
-        'PASS: production server starts, development credentials rejected, session absent, projects return 401.',
+        'PASS: production server starts, development credentials rejected, session absent, existing development token revoked, projects return 401.',
       );
     } finally {
       await context.dispose();

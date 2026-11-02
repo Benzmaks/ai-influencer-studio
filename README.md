@@ -20,4 +20,4 @@ npm run health
 npm run dev
 ```
 
-Production sign-in is intentionally disabled until an OIDC integration is implemented. Use `AUTH_MODE=disabled npm run build` for the production build. See the development guide for tests, CI and the explicit Prisma migration-mode limitations.
+Production sign-in is intentionally disabled until an OIDC integration is implemented. Use `STUDIO_PRISMA_ENGINE=classic PRISMA_CLIENT_ENGINE_TYPE=library AUTH_MODE=disabled npm run build` for the production build. See the development guide for tests, CI and the native Prisma defaults and explicit experimental local fallback. See [PR #1 review](docs/phase-1-review.md) for verified compatibility and migration-safety findings.

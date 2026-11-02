@@ -1,17 +1,20 @@
 import 'dotenv/config';
 import { defineConfig } from 'prisma/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-// Explicit development fallback: verified npm-distributed WASM replaces native downloads.
-// v7 pg adapter fixes catalog-type support and transaction cleanup; compatibility is integration-tested.
-const native = process.env.STUDIO_PRISMA_ENGINE === 'classic';
+import { experimentalPrismaAllowed } from './lib/prisma-mode';
+const experimental = experimentalPrismaAllowed();
+if (experimental)
+  console.warn(
+    'LOCAL EXPERIMENT ONLY: Prisma 6 schema WASM + pg adapter 7 is not a supported release configuration.',
+  );
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: { path: 'prisma/migrations', seed: 'tsx database/seed.ts' },
-  ...(native
-    ? { engine: 'classic' as const, datasource: { url: process.env.DATABASE_URL ?? '' } }
-    : {
+  ...(experimental
+    ? {
         experimental: { adapter: true },
         engine: 'js' as const,
         adapter: async () => new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-      }),
+      }
+    : { engine: 'classic' as const, datasource: { url: process.env.DATABASE_URL ?? '' } }),
 });

@@ -1,10 +1,21 @@
 import { z } from 'zod';
+import { experimentalPrismaAllowed } from './prisma-mode';
 export function readEnvironment(source: Record<string, string | undefined> = process.env) {
   const schema = z.object({
     DATABASE_URL: z.string().startsWith('postgresql://'),
     REDIS_URL: z.string().regex(/^rediss?:\/\//),
     AUTH_SECRET: z.string().min(32),
-    AUTH_URL: z.url(),
+    AUTH_URL: z.url().refine((value) => {
+      const url = new URL(value);
+      return (
+        ['http:', 'https:'].includes(url.protocol) &&
+        !url.username &&
+        !url.password &&
+        url.pathname === '/' &&
+        !url.search &&
+        !url.hash
+      );
+    }, 'AUTH_URL must be an HTTP(S) origin.'),
     AUTH_MODE: z.enum(['development', 'disabled']).default('disabled'),
     LANGUAGE_PROVIDER: z.literal('mock').default('mock'),
     IMAGE_PROVIDER: z.literal('mock').default('mock'),
@@ -21,6 +32,7 @@ export function readEnvironment(source: Record<string, string | undefined> = pro
     );
   if (source.NODE_ENV === 'production' && result.data.AUTH_MODE === 'development')
     throw new Error('Development authentication is forbidden in production.');
+  experimentalPrismaAllowed(source);
   return result.data;
 }
 export function developmentLoginAllowed(source: Record<string, string | undefined> = process.env) {

@@ -45,3 +45,7 @@ Unit checks cover deterministic language/image/video mock contracts, batch sizes
 - Generated Next.js declaration formatting was excluded from source formatting checks.
 
 There are no unresolved failures in the local required application checks. Remaining review items are the pinned Auth.js beta, Prisma adapter/migration compatibility and production-specific integrations. GitHub API network access remains an external workflow blocker; its required `api.github.com` addition is saved in the environment draft. Saving does not apply or publish configuration. See [development.md](development.md) for reproducible commands and [environment.md](environment.md) for configuration.
+
+## PR #1 review supersedes compatibility claims
+
+See [phase-1-review.md](phase-1-review.md). The historical local runs above do not establish supported mixed-major compatibility: the hosted push run later exposed a teardown timeout, while the original PR run passed. Native Prisma 6 is now the default in CI/releases; the unsupported adapter/WASM path requires explicit local opt-in. Original migration SQL is unchanged. Review-time checks include 23 unit tests, eight project/snapshot integration tests and an isolated populated-database migration-preservation check. Native hosted results are recorded in the review after completion.
