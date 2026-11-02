@@ -108,10 +108,17 @@ export const mockVideo: VideoProvider = {
     operations: ['generate', 'image-to-video'],
     batchSizes: [1, 2, 4, 8],
     maxDurationSeconds: 2,
+    supportedDurations: [2],
+    audio: false,
+    storyboard: 'per-shot',
   },
   async generate(input, options) {
     requireCapability(this.capabilities, input.source ? 'image-to-video' : 'generate', input);
     await simulate(options);
+    const delay = Number(process.env.MOCK_VIDEO_DELAY_MS ?? 0);
+    if (Number.isFinite(delay) && delay > 0)
+      await new Promise((resolve) => setTimeout(resolve, Math.min(delay, 10000)));
+    options?.signal?.throwIfAborted();
     const bytes = await readFile(path.join(process.cwd(), 'ai/fixtures/mock-video.mp4'));
     return Array.from({ length: input.count }, (_, i) => ({
       bytes: Uint8Array.from(bytes),
