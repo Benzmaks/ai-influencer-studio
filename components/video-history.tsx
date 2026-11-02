@@ -230,7 +230,8 @@ export function VideoHistory({
           <details>
             <summary>Generation details</summary>
             <p>
-              Saved {new Date(job.createdAt).toLocaleString()} · job {job.id}
+              Saved {new Date(job.createdAt).toISOString().replace('T', ' ').slice(0, 19)} UTC · job{' '}
+              {job.id}
             </p>
             <pre>{JSON.stringify(job.input, null, 2)}</pre>
           </details>
