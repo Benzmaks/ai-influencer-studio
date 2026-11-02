@@ -24,3 +24,8 @@ Tests cover deterministic concepts/prompts, adaptive negatives, protected anchor
 ## Implemented Phase 4 boundary
 
 The image-only branch is implemented: authorized effective inputs → transactional Generation/slots/outbox → Redis/BullMQ delivery → separately running worker → deterministic labeled mock PNG → private local storage → fenced result commit → authorized polling/gallery/download. Generation references exact SceneVersion and CharacterVersion snapshots and recomputes continuity/prompts before acceptance. Video dispatch and editing remain unimplemented. See image-generation.md for the working lifecycle, quotas, cancellation, retries and recovery limitations. Earlier Future generation boundary text describes the original Phase 3 boundary, now realized for mock images only.
+
+
+## Phase 5 mock edits and history
+
+The existing queue now dispatches ImageProvider.edit with exact source bytes, instruction, source metadata envelope and pinned Character DNA/Visual Bible/Realism DNA. It checks source checksum and preserves originals; byte-copy jobs bypass model calls. Image-only targets and cumulative instructions are persisted, protected canonical/signature mutations are rejected by conservative rules, and new parents are immutable. Comparison/library/final selection use authorized asset services. No real provider, photo retouching or video dispatch is implemented. See image-editing.md.

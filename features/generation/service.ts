@@ -1,3 +1,5 @@
+import { planEdit, editContext, editPrompt } from '@/ai/edit-engine';
+import { rootOf, loadGraph } from '@/features/assets/lineage';
 import { createHash } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
@@ -79,6 +81,22 @@ export async function createGeneration(
               400,
               'The assembled prompt exceeds the mock provider limit. Shorten custom scene or character text.',
             );
+          const operation = data.operation ?? (data.sourceAssetId ? 'variations' : 'generate');
+          if (
+            operation === 'edit' &&
+            (!data.sourceAssetId || !data.instruction || data.editScope !== 'scene-only')
+          )
+            throw new AppError(
+              400,
+              'Edits require a source image, instructions and explicit image-only scope.',
+            );
+          if (['variations', 'duplicate'].includes(operation) && !data.sourceAssetId)
+            throw new AppError(400, 'Variations require a source image.');
+          if (operation !== 'edit' && (data.instruction || data.editScope))
+            throw new AppError(400, 'Editing instructions require an edit operation.');
+          let sourcePositive = prompt.positive,
+            sourceNegative = prompt.negative,
+            originalAssetId: string | undefined;
           if (data.sourceAssetId) {
             const source = await tx.imageAsset.findFirst({
               where: { id: data.sourceAssetId, projectId, status: 'completed' },
@@ -94,10 +112,56 @@ export async function createGeneration(
                 'Variation source must be a completed image from these exact character and scene versions.',
               );
           }
+          let sourceReference: Prisma.InputJsonValue | null = null;
+          let sourceTrail: string[] = [],
+            sourceChecksum: string | undefined;
+          let editPlan: ReturnType<typeof planEdit> | undefined;
+          if (data.sourceAssetId) {
+            const source = await tx.imageAsset.findFirstOrThrow({
+              where: { id: data.sourceAssetId, projectId },
+            });
+            const meta = source.metadata as Record<string, unknown>;
+            sourceTrail = Array.isArray(meta.editTrail)
+              ? meta.editTrail.filter((s): s is string => typeof s === 'string')
+              : [];
+            sourceChecksum = source.checksum ?? undefined;
+            sourceReference = {
+              id: source.id,
+              checksum: source.checksum,
+              createdAt: source.createdAt.toISOString(),
+              metadata: Object.fromEntries(
+                Object.entries(meta).filter(
+                  ([key]) => !['preservation', 'sourceReference'].includes(key),
+                ),
+              ) as Prisma.InputJsonObject,
+            };
+            sourcePositive = String(meta.positive ?? prompt.positive);
+            sourceNegative = String(meta.negative ?? prompt.negative);
+            originalAssetId = rootOf(await loadGraph(projectId, tx), source.id);
+          }
+          if (operation === 'edit') {
+            editPlan = planEdit(scene.characterVersion.snapshot, data.instruction!);
+            if (editPlan.status === 'conflict') throw new AppError(409, editPlan.message);
+            sourcePositive = editPrompt(sourcePositive, data.instruction!, editPlan.targets);
+          }
+          if (sourcePositive.length > 10000)
+            throw new AppError(
+              400,
+              'This edit history exceeds the prompt limit. Start a new original from a scene.',
+            );
           const snapshot = {
             ...data,
-            positive: prompt.positive,
-            negative: prompt.negative,
+            operation,
+            execution: operation === 'duplicate' ? 'storage-copy' : 'mock-provider',
+            originalAssetId: originalAssetId ?? null,
+            editTrail: [...sourceTrail, ...(data.instruction ? [data.instruction] : [])],
+            sourceChecksum: sourceChecksum ?? null,
+            sourceReference,
+            editPlan: editPlan ?? null,
+            preservation:
+              operation === 'edit' ? editContext(scene.characterVersion.snapshot) : null,
+            positive: sourcePositive,
+            negative: sourceNegative,
             findings: prompt.findings,
             rulesVersion: prompt.rulesVersion,
             realism: choices.realism,
@@ -107,7 +171,10 @@ export async function createGeneration(
             sceneVersion: scene.versionNumber,
             mock: true,
             cost: { currency: 'USD', estimated: 0, charged: 0 },
-            label: 'Mock procedural test patterns — not AI photography',
+            label:
+              operation === 'edit'
+                ? 'Simulated mock edit — no real image processing'
+                : 'Mock procedural test patterns — not AI photography',
           };
           return tx.generation.create({
             data: {
@@ -226,6 +293,8 @@ export async function reviewAsset(userId: string, projectId: string, id: string,
       data: { review },
     });
     if (!result.count) throw new AppError(404, 'Image not found.');
+    if (review === 'rejected')
+      await tx.assetSelection.deleteMany({ where: { projectId, assetId: id } });
     return { review };
   });
 }

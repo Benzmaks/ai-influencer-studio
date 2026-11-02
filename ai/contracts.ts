@@ -23,6 +23,7 @@ export type MediaInput = {
   seed: number;
   source?: Uint8Array;
   instruction?: string;
+  references?: Record<string, unknown>;
   durationSeconds?: number;
   aspectRatio?: string;
   variationStrength?: string;

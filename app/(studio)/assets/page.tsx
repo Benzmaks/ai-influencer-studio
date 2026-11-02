@@ -1,32 +1,32 @@
 import Link from 'next/link';
 import { workspace } from '@/lib/workspace';
-import { listGenerations } from '@/features/generation/service';
-import { ImageStudio, type ImageJob } from '@/components/image-studio';
+import { assetLibrary } from '@/features/assets/service';
+import { AssetLibrary } from '@/components/asset-library';
+import type { LibraryView } from '@/components/asset-types';
 export default async function Assets() {
   const { user, project, canWrite } = await workspace();
-  const jobs = project ? await listGenerations(user.id, project.id) : [];
+  const data = project ? await assetLibrary(user.id, project.id) : null;
   return (
     <>
       <span className="eyebrow">YOUR PRIVATE CREATIVE LIBRARY</span>
       <div className="page-heading">
         <div>
           <h1>Assets</h1>
-          <p>Review, save and download your mock image results.</p>
+          <p>Organize your frames. Explore their history. Find your final.</p>
         </div>
         <Link className="button primary" href="/images">
           Open Image Studio
         </Link>
       </div>
-      {project && (
-        <ImageStudio
-          library
+      {project && data ? (
+        <AssetLibrary
           key={project.id}
           projectId={project.id}
-          characters={[]}
-          scenes={[]}
-          initialJobs={JSON.parse(JSON.stringify(jobs)) as ImageJob[]}
+          initial={JSON.parse(JSON.stringify(data)) as LibraryView}
           canWrite={canWrite}
         />
+      ) : (
+        <Link href="/projects">Choose a project</Link>
       )}
     </>
   );

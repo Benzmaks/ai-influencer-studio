@@ -37,3 +37,7 @@ Run PostgreSQL, Redis and shared local asset storage, then `npm ci`, `npm run db
 Optional IMAGE_QUEUE_NAME defaults to studio-images (deployment namespace), and MOCK_IMAGE_DELAY_MS accepts 0–10000 for local mock progress/recovery testing; neither changes output bytes. The private Mac launcher runs password-protected local Redis on 56379 and a separate worker without Docker. Standard CI uses Node 24/native Prisma; the existing Monterey compatibility preview retains Node 22. Physical Mac Redis compilation/launcher execution remains unverified in the cloud environment.
 
 Run integration tests against an isolated development/test database with the normal worker stopped: they inject failures and kill their own isolated worker. CI starts its browser worker only after integration tests finish. See phase-4-validation.md for actual outcomes and ai-pipeline.md for phase boundaries.
+
+## Phase 5 extension
+
+Mock image editing, byte-copy duplication, branch history, comparison, final selection and richer library organization are now implemented on the Phase 5 branch; see image-editing.md. Earlier Phase 4 scope statements above describe that milestone's original boundary. New optional request fields select edit/copy operations without enabling a real provider. Existing async reliability and storage guarantees remain, with added SQL guards for immutable completed originals and parent relationships. Collections and real image processing are still absent.

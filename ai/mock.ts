@@ -74,7 +74,7 @@ async function image(
         ? mockRaster(
             input.seed + i,
             input.aspectRatio,
-            input.prompt + '\n' + (input.negativePrompt ?? ''),
+            input.prompt + '\n' + (input.negativePrompt ?? '') + '\n' + (input.instruction ?? ''),
             input.variationStrength ?? 'balanced',
             input.source,
           )
@@ -83,7 +83,9 @@ async function image(
         bytes: Uint8Array.from(bytes),
         mimeType: 'image/png',
         label: input.aspectRatio
-          ? 'Mock output · procedural test pattern, not AI photography'
+          ? operation === 'edit'
+            ? 'Simulated mock edit · no real image processing'
+            : 'Mock output · procedural test pattern, not AI photography'
           : 'Mock output · illustrative sample, not generated photography',
         mock: true as const,
         seed: input.seed + i,

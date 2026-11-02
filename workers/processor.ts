@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { db } from '@/lib/db';
 import { requireMembership } from '@/lib/access';
 import { LocalStorage } from '@/storage/local';
@@ -74,6 +74,8 @@ export async function processGeneration(
         where: { id: data.sourceAssetId, projectId: job.projectId, status: 'completed' },
       });
       source = await storage.read(actor, a.key!);
+      if (createHash('sha256').update(source).digest('hex') !== a.checksum)
+        throw new Error('Source checksum mismatch.');
     }
     const assets = await db.imageAsset.findMany({
       where: { generationId: id },
@@ -121,10 +123,28 @@ export async function processGeneration(
             aspectRatio: data.aspectRatio,
             variationStrength: data.variationStrength,
             source,
+            instruction: data.instruction,
+            references: {
+              ...(snapshot.preservation as Record<string, unknown> | undefined),
+              sourceImage: snapshot.sourceReference,
+            },
           };
-          const outputs = await (source
-            ? provider.createVariations(input)
-            : provider.generate(input));
+          const outputs =
+            data.operation === 'duplicate' && source
+              ? [
+                  {
+                    bytes: source,
+                    mimeType: 'image/png',
+                    mock: true,
+                    label: 'Copy of mock image',
+                    seed: input.seed,
+                  },
+                ]
+              : await (data.operation === 'edit'
+                  ? provider.edit(input)
+                  : source
+                    ? provider.createVariations(input)
+                    : provider.generate(input));
           if (outputs.length !== 1 || !outputs[0].mock)
             throw new Error('Unexpected provider output.');
           stored = await storage.put(actor, outputs[0].bytes, outputs[0].mimeType);

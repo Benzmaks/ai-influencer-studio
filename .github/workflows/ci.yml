@@ -9,6 +9,7 @@ on:
         phase-2-character-dna,
         phase-3-scene-prompt-engine,
         phase-4-image-generation,
+        phase-5-image-editing,
       ]
 permissions:
   contents: read

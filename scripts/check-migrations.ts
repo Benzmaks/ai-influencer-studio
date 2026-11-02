@@ -139,8 +139,23 @@ async function main() {
     await pool.query(
       `INSERT INTO "SceneVersion" (id,"projectId","sceneId","versionNumber","characterId","characterVersionId",choices,prompt,"createdBy") VALUES ('migration-scene-version','migration-project','migration-scene',1,'migration-character','migration-version-2','{"title":"Preserve scene"}'::jsonb,'{"ready":true}'::jsonb,'migration-owner')`,
     );
+    const fourth = '202611020004_images';
+    await mkdir(path.join(upgradeRoot, 'migrations', fourth), { recursive: true });
+    await copyFile(
+      path.resolve('prisma/migrations', fourth, 'migration.sql'),
+      path.join(upgradeRoot, 'migrations', fourth, 'migration.sql'),
+    );
+    await migrate(configPath);
+    await pool.query(
+      `INSERT INTO "Generation" (id,"projectId","createdBy","characterId","characterVersionId","sceneId","sceneVersionId",input,"requestHash","idempotencyKey",status,"updatedAt") VALUES ('migration-generation','migration-project','migration-owner','migration-character','migration-version-2','migration-scene','migration-scene-version','{"seed":42}'::jsonb,'fixture-hash','fixture-idempotency','completed',NOW())`,
+    );
+    await pool.query(
+      `INSERT INTO "ImageAsset" (id,"projectId","generationId",index,status,key,checksum,"mimeType",size,metadata,"updatedAt") VALUES ('migration-image','migration-project','migration-generation',0,'completed','migration-project/fixture','original-checksum','image/png',8,'{"mock":true}'::jsonb,NOW())`,
+    );
     async function contents() {
       return {
+        assets: (await pool!.query('SELECT * FROM "ImageAsset" ORDER BY id')).rows,
+        generations: (await pool!.query('SELECT * FROM "Generation" ORDER BY id')).rows,
         scenes: (await pool!.query('SELECT * FROM "Scene" ORDER BY id')).rows,
         sceneVersions: (await pool!.query('SELECT * FROM "SceneVersion" ORDER BY id')).rows,
         drafts: (await pool!.query('SELECT * FROM "CharacterDraft" ORDER BY id')).rows,
@@ -158,6 +173,16 @@ async function main() {
       upgraded.drafts,
       beforeUpgrade.drafts,
       'Upgrade preserves incomplete DNA drafts.',
+    );
+    assert.deepEqual(
+      upgraded.assets,
+      beforeUpgrade.assets,
+      'Existing original asset metadata, parent and checksum preserved.',
+    );
+    assert.deepEqual(
+      upgraded.generations,
+      beforeUpgrade.generations,
+      'Generation history preserved.',
     );
     assert.deepEqual(upgraded.scenes, beforeUpgrade.scenes, 'Scene records preserved.');
     assert.deepEqual(
@@ -181,7 +206,7 @@ async function main() {
       'Upgrade preserves project memberships.',
     );
     assert.deepEqual(
-      upgraded.history.filter((row) => [first, second, third].includes(row.migration_name)),
+      upgraded.history.filter((row) => [first, second, third, fourth].includes(row.migration_name)),
       beforeUpgrade.history,
       'Original migration history is unchanged.',
     );
@@ -205,7 +230,7 @@ async function main() {
     assert.equal(update.rowCount, 0);
     assert.deepEqual(await contents(), original, 'Original snapshots must remain immutable.');
     console.log(
-      'PASS: Phase 1-to-Phase 2-to-Phase 3-to-current upgrade, preserved DNA drafts, migration checksums, populated redeployment, canonical pointer, membership and immutable snapshots verified in an isolated database.',
+      'PASS: Phase 1-to-Phase 2-to-Phase 3-to-Phase 4-to-current upgrade, preserved DNA drafts, migration checksums, populated redeployment, canonical pointer, membership and immutable snapshots verified in an isolated database.',
     );
   } finally {
     await pool?.end();

@@ -1,0 +1,35 @@
+# Image editing, comparison and version history — Phase 5
+
+The existing Image Studio remains intact. Each completed result links to Edit & history, and Assets now provides search/filtering and comparison selection. All work remains mock-only: an edit produces another clearly labeled deterministic geometric test pattern using source bytes, instructions and seed. It does not change an outfit/background in a real photograph or invoke a real or paid image provider.
+
+## Editor and preservation
+
+Open a completed image from Images or Assets. Choose an outfit/background/lighting/expression/candidness preset or write a bounded natural-language instruction. Choose 1/2/4/8 edited results, then Request mock edit. The scope is explicitly image-only (stored as scene-only); canonical Character DNA and SceneVersion snapshots are never changed. A new Generation and pending child slots are created through the existing transactional outbox. The ordinary worker calls ImageProvider.edit with the exact source bytes, effective prompt, instruction, settings, pinned Character DNA/Visual Bible/Realism DNA/signature references, and a compact original metadata envelope. Source checksum is verified before any provider call.
+
+The English rule planner identifies edit targets and rejects recognized facial/body identity, permanent marks and signature-anchor changes. Signature hair/accessories receive conservative checks. Recognized temporary appearance overrides and unrecognized custom text require review and remain image-only. These are deterministic rules, not semantic AI validation of arbitrary prose or other languages. Every provider request explicitly locks unrelated identity and signature anchors. No photographic identity preservation is being claimed for the pattern simulation. A future real provider requires stronger validation/review before being enabled.
+
+Permanent identity updates use the existing Character DNA editor and append a new immutable character version, followed by a matching scene/new original. The image editor never silently repoints existing image trees to a new identity. Existing archived-character generation policy remains enforced. The pinned source prompts/negative terms are retained; each edit layers only its instruction/targets onto the effective prompt and records a cumulative edit trail. Prompt length remains bounded. Copies and subsequent variations retain the effective prompt and edit trail.
+
+## Version tree and originals
+
+ImageAsset.sourceAssetId is the direct parent; the root is calculated by validated ancestry inside the authorized project. Original → Variations → Edits → Final is shown as a visual indented branch history with thumbnails, stable asset identifiers, version labels, instructions, status/progress and timestamps. Pending/failed/cancelled children remain traceable. Open any completed child to edit again, compare with the current source, duplicate it or select a final. Version numbers in this view identify chronological entries in the displayed tree; immutable IDs are the authoritative references.
+
+Every new asset gets a new private object key. Editing never writes to the original path. Duplicate queues an asynchronous byte-for-byte private storage copy with a new asset/parent reference and execution=storage-copy; no model is invoked. Edits use execution=mock-provider and store full job/settings/provider provenance. Originals retain their checksum and bytes. Database triggers reject parent/project/generation/index mutation on all assets and key/checksum/metadata/status/mime/size mutation after completion. Parent inserts require an existing completed same-project asset pinned to the same character/scene versions. A self-parent check and immutable parent links prevent new cycles; service graph walks detect invalid legacy cycles or missing/cross-project parents.
+
+## Comparison and final selection
+
+Select 2–4 completed assets in Assets and choose Compare selected, or compare a child with its source in the tree. The comparison strip shows original/edit/variation identification, individual zoom from 1×–3× with scrolling, metadata and download. Desktop shows adjacent cards; mobile supports swiping the comparison strip without page overflow. Select preferred final persists one choice per original root, not one choice for the entire project. Different originals may each have a final.
+
+AssetSelection stores project/root, chosen asset, actor, update time and revision. Server checks and SQL ancestry guards require a completed, non-rejected candidate from that root. Serializable writes and expected revisions detect concurrent/stale selection changes. Viewer access cannot edit/review/select; owners/editors can. Rejecting an image clears its final selection atomically while preserving all bytes and history; selecting a rejected image requires changing its review state first. A final choice never deletes alternative versions.
+
+## Asset organization
+
+Assets searches character/scene labels, effective edit instructions and IDs with case/accent normalization. Character and scene filters, original/variation/edit/duplicate type filters, favourites, rejected/unreviewed and final-selection filters compose together. Paging returns 24 matches at a time; comparison selection can span pages. Details/history, favourites/rejection and private PNG download are functional. Collection models and collection controls are not implemented. Project quota remains bounded to 2000 result slots and 10 active batches. Search operates within the authorized bounded project library; it is not a cross-project search.
+
+## Reliability, authorization and boundaries
+
+Edits/copies reuse the existing asynchronous jobs, per-project idempotency, request-hash conflict detection, fenced worker leases, cancellation, partial results, bounded attempts/manual retries and durable Redis/outbox recovery. Legacy Phase 4 requests remain accepted; new optional operation/instruction/scope fields do not alter their normalized hash when omitted. All asset, library, comparison, edit, copy and selection services enforce project membership; mutation routes verify browser Origin and owner/editor access. Downloads remain authenticated, private/no-store and checksum-verified. No user-supplied storage path or parent rewrite endpoint exists.
+
+Native Prisma 6.19.3 migrations are the supported path. The additive fifth migration creates AssetSelection plus lineage/original/selection guards; previous migrations and existing snapshots are not rewritten. The existing local experimental query adapter is not a native migration certification. A hard process kill between writing a new private object and committing its reference can still leave an unreferenced private file, as documented in Phase 4. Orphan retention/cleanup and real-provider integrations remain future work, not completed here.
+
+See development.md and phase-5-validation.md for setup, actual test outcomes, CI evidence and the private Mac preview. Phase 6 remains unimplemented.

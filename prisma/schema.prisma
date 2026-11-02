@@ -230,7 +230,21 @@ model ImageAsset {
  generation Generation @relation(fields:[projectId,generationId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  source ImageAsset? @relation("Sources",fields:[projectId,sourceAssetId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  children ImageAsset[] @relation("Sources")
+ rootSelections AssetSelection[] @relation("SelectedRoot")
+ finalSelections AssetSelection[] @relation("SelectedImage")
  @@unique([generationId,index])
  @@unique([projectId,id])
  @@index([projectId,createdAt])
+}
+
+model AssetSelection {
+ projectId String
+ rootAssetId String
+ assetId String
+ revision Int @default(1)
+ updatedBy String
+ updatedAt DateTime @updatedAt
+ root ImageAsset @relation("SelectedRoot",fields:[projectId,rootAssetId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
+ asset ImageAsset @relation("SelectedImage",fields:[projectId,assetId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
+ @@id([projectId,rootAssetId])
 }
