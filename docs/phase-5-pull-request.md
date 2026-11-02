@@ -18,3 +18,11 @@ lint-only compatibility bridge and security regression tests. Adds a mandatory
 moderate-or-higher audit gate and full native CI on Node 24 and Monterey's Node
 22 preview version. No schema/data migration changes or real providers.
 See docs/security-maintenance.md for compatibility tradeoffs and final evidence.
+
+Security implementation CI passed both complete Node 24/Node 22 native jobs:
+https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41435249687 .
+Each passed the new audit gate (zero findings), migrations, 61 unit tests,
+36 integration tests, 20 browser tests and production safeguards. Refreshed
+Monterey ZIP pins the security implementation; merging does not update an
+existing Mac installation automatically. Earlier local experimental-engine and
+browser timing failures are retained in the verification notes.

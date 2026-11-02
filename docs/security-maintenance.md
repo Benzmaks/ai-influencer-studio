@@ -61,11 +61,35 @@ engine declaration remains Node 24; the Mac launcher deliberately allows the
 separately tested Node 22 preview. Its existing engine warning is not a new
 vulnerability or an invitation to replace Monterey's compatible runtime.
 
-Local checks and final hosted run evidence will be recorded below before
-recommending that PR #5 be merged. The cloud's native Prisma engine download
-restriction and experimental migration/shutdown limitations remain as described
-in [phase-5-validation.md](phase-5-validation.md). Hosted native checks are the
-migration release gate. No paid provider or next-phase work is included.
+Security implementation: `10983b0d71eac84394fe1f6e2e6bbae4fb4e7682`.
+Hosted native CI **passed both complete matrix jobs**, Node 24.19.0 and 22.23.4:
+[push run 41435249687](https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41435249687)
+(6m 14s), and
+[PR run 41435266463](https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41435266463)
+(6m 15s). Each runs locked install/audit, native fresh and repeated migrations,
+repeatable seed, populated migration preservation checks, lint/types/format,
+61 unit tests, 36 integration/authorization/recovery tests, production build and
+authentication guards, and all 20 desktop/mobile browser tests. The hosted runs
+use the original committed browser timeouts; no assertions are skipped.
+
+Local checks passed: clean locked installation with postinstall; full and
+production-only audits (zero findings); Prisma client generation; 61/61 unit
+tests on Node 24 and again on Node 22; lint, types, formatting; production build
+and authentication guards; infrastructure health; unchanged migration bytes;
+Mac updater Bash syntax, ZIP byte integrity and published source contents.
+The lint-only installer also exits successfully when development dependencies
+are absent.
+
+Local failures are recorded separately: the experimental adapter integration
+run passed 35/36 with the known repeated-disconnect timeout; the WASM migration
+check failed deserializing PostgreSQL catalog type `name`. The first browser
+run passed 17/20, with three five-second login/character/gallery wait timeouts.
+Both native hosted matrix jobs passed the complete checks with their original
+settings, independently of these cloud-only limitations. See
+[phase-5-validation.md](phase-5-validation.md) for the existing engine restriction.
+Physical Monterey execution of the refreshed updater and backup restoration are
+unavailable here. No paid/real provider tests apply; none were connected. No
+test is silently skipped to obtain the hosted result. No next-phase work is included.
 
 ## Install on the existing private Mac
 

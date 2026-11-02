@@ -1,9 +1,13 @@
-PHASE 5 PRIVATE MONTEREY PREVIEW
+PHASE 5 PRIVATE MONTEREY PREVIEW — SECURITY UPDATE
+
+This refreshed updater includes the dependency security fixes. Download and extract a fresh copy even if Phase 5 is already installed. Existing data and private credentials are retained.
 
 Save unsaved Studio work first. Extract this ZIP into Downloads, then paste into Terminal:
 /bin/bash "$HOME/Downloads/Phase 5 Preview/Preview Phase 5.command"
 
 The updater backs up your existing private database/source/environment, installs a pinned Phase 5 snapshot, preserves login/characters/scenes/images/assets, applies the additive history migration and restarts the private app, Redis and worker. It retains the launcher-root fix from Phase 4. No database reset or public deployment occurs. Keep Postgres.app installed. Existing Redis is reused; if missing, official checksum-verified Redis source is built locally (Apple Command Line Tools may be required). No Docker or Homebrew is needed.
+
+The security update removes the 19 reported npm advisory entries. npm may still show the existing Node 24 engine notice (this private Monterey preview uses tested Node 22) and ESLint 9 maintenance notice. These notices are separate from security findings. Do not run npm audit fix --force.
 
 Use your existing login at http://localhost:3000. The starter copies the private password to your clipboard; type the email, then press Command-V in the browser password field.
 

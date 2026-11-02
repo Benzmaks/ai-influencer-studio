@@ -1,6 +1,17 @@
 # Phase 5 verification
 
-Phase 4 merge verified at `7177277`, including launcher fix `08d01f8`. Phase 5 is isolated on phase-5-image-editing; implementation and Mac source snapshot are pinned to `1236de028a9232f3e3169ac684cf82a5b7b1fcb0`. Nothing was merged and Phase 6 was not started.
+Phase 4 merge verified at `7177277`, including launcher fix `08d01f8`. Phase 5 is isolated on phase-5-image-editing; its initial implementation was `1236de028a9232f3e3169ac684cf82a5b7b1fcb0`. The refreshed Mac updater now pins security implementation `10983b0d71eac84394fe1f6e2e6bbae4fb4e7682`. Nothing was merged and Phase 6 was not started.
+
+## Security follow-up
+
+The reported 19 dependency-path findings are resolved: full and production-only
+audits report zero vulnerabilities. Security implementation native CI passed
+both Node 24 and Monterey's Node 22 matrix jobs, including all migrations,
+61 unit tests, 36 integration tests and 20 browser tests per runtime:
+https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41435249687 .
+See [security-maintenance.md](security-maintenance.md) for exact overrides,
+lint compatibility safeguards, local failures/limitations and refreshed updater.
+The original Phase 5 evidence below describes the earlier implementation.
 
 ## Passed
 
