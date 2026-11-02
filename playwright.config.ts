@@ -5,7 +5,8 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  reporter: 'list',
+  expect: { timeout: 15000 },
+  reporter: process.env.CI ? [['list'], ['github']] : 'list',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
