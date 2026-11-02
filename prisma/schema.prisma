@@ -62,6 +62,7 @@ model Project {
   characters Character[]
   drafts CharacterDraft[]
   auditEvents AuditEvent[]
+  scenes Scene[]
 }
 model ProjectMembership {
   projectId String
@@ -106,6 +107,7 @@ model CharacterVersion {
   createdAt DateTime @default(now())
   character Character @relation("History", fields: [projectId, characterId], references: [projectId, id], onDelete: Restrict)
   canonicalFor Character? @relation("Current")
+  sceneVersions SceneVersion[]
   @@unique([characterId, versionNumber])
   @@unique([projectId, characterId, id])
   @@index([projectId, characterId, createdAt])
@@ -137,4 +139,34 @@ model CharacterDraft {
   author User @relation(fields:[createdBy],references:[id],onDelete:Cascade)
   character Character? @relation(fields:[projectId,characterId],references:[projectId,id],onDelete:Restrict)
   @@index([projectId,createdBy,completedAt,updatedAt])
+}
+
+model Scene {
+ id String @id @default(cuid())
+ projectId String
+ title String
+ revision Int @default(1)
+ status String @default("draft")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ project Project @relation(fields:[projectId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ versions SceneVersion[]
+ @@unique([projectId,id])
+ @@index([projectId,updatedAt])
+}
+model SceneVersion {
+ id String @id @default(cuid())
+ projectId String
+ sceneId String
+ versionNumber Int
+ characterId String
+ characterVersionId String
+ choices Json
+ prompt Json
+ createdBy String
+ createdAt DateTime @default(now())
+ scene Scene @relation(fields:[projectId,sceneId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
+ characterVersion CharacterVersion @relation(fields:[projectId,characterId,characterVersionId],references:[projectId,characterId,id],onDelete:Restrict,onUpdate:NoAction)
+ @@unique([sceneId,versionNumber])
+ @@index([projectId,characterId,characterVersionId])
 }

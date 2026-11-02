@@ -1,0 +1,5 @@
+import type { CharacterSnapshot } from '@/features/characters/dna';
+export function realismInstructions(dna: CharacterSnapshot, level: number) {
+  const a = dna.answers;
+  return `Realism ${level}/5. ${['Editorial polish', 'Polished social photography', 'Natural influencer photography', 'Candid human photography', 'Documentary photography'][level - 1]}. Skin: ${a.skinTexture}; pores: ${a.pores}; freckles: ${a.freckles}; beauty marks: ${a.beautyMarks}; scars: ${a.scars}; under-eye texture: ${a.underEyeTexture}; lip texture: ${a.lipTexture}; peach fuzz: ${a.peachFuzz}; pigmentation: ${a.pigmentation}; asymmetry: ${a.asymmetry}; hair: ${a.hairTexture}; body asymmetry: ${a.bodyAsymmetry}. Preserve signature imperfections: ${a.signatureImperfections.join(', ')}. Generic “None” means no additional marks beyond these signature anchors. Natural posture, age-appropriate fine lines, believable fabric, reflections and shadows; restrained flyaway hairs and photographic imperfections without inventing new permanent marks.`;
+}

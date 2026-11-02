@@ -83,3 +83,8 @@ The supported default now uses the aligned Prisma 6.19.3 CLI/client native engin
 ## Phase 2 character creator
 
 The Character module now includes the ten-step creator, private resumable drafts, deterministic mock-language orchestration and seven canonical profile documents. Existing Phase 1 services and appearance remain; basic identity updates preserve DNA. Drafts have separate optimistic revisions and transactional publication. Permanent edits append immutable versions. Scene continuity and other later modules remain planned. See [character-system.md](character-system.md), [database.md](database.md) and [phase-2-validation.md](phase-2-validation.md).
+
+
+## Phase 3 implementation
+
+`features/scenes` validates choices and serves authorized scene repositories/transactions. `ai/continuity-engine`, `ai/realism-engine`, and separate positive/negative modules under `ai/prompt-engine` prepare deterministic labeled mock prompts from pinned Character DNA snapshots. `/scenes`, `/scenes/new` and `/scenes/[id]` replace the scene placeholder; image/video/job modules remain Planned. JSON snapshots live in PostgreSQL, not media storage. No worker or paid provider is introduced. See prompt-engine.md and ai-pipeline.md.
