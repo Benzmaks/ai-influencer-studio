@@ -46,7 +46,7 @@ export function Navigation() {
           >
             <Icon size={19} />
             <span>{label}</span>
-            {['Scenes', 'Images', 'Videos', 'Content', 'Assets', 'Automations'].includes(label) && (
+            {['Images', 'Videos', 'Content', 'Assets', 'Automations'].includes(label) && (
               <span className="nav-dot" aria-label="Planned" />
             )}
           </Link>

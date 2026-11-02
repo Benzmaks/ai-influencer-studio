@@ -71,3 +71,8 @@ Auth.js credentials use JWT sessions; Account/Session/VerificationToken tables a
 ## Phase 2 additions
 
 CharacterDraft is implemented with private creator/project scope, optional target/base revision, bounded wizard state, optimistic revision and completion state. Publication is transactional and pins the complete schema-version-2 canonical snapshot. No original migration or schema-version-1 row was rewritten. See [database.md](database.md) and [character-system.md](character-system.md).
+
+
+## Implemented Phase 3 entities
+
+Scene belongs to a project and stores mutable title/status plus optimistic revision. SceneVersion is an immutable append-only snapshot with a unique scene/versionNumber, full choices, compiled prompt JSON (including continuity and rule version), author and creation time. It has composite foreign keys to the same-project Scene and exact same-project CharacterVersion; a changed current character never repoints prior scenes. Scene status is draft or ready; ready means continuity allows prompt preparation, not media generation. The highest versionNumber is current, advanced atomically with Scene.revision. Project members can read; only owners/editors can write. Draft scenes are shared within the project, unlike private per-author character drafts.

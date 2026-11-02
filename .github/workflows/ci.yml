@@ -1,8 +1,8 @@
-name: Phase 1 checks
+name: Studio checks
 on:
   pull_request:
   push:
-    branches: [main, phase-1-foundation, phase-2-character-dna]
+    branches: [main, phase-1-foundation, phase-2-character-dna, phase-3-scene-prompt-engine]
 permissions:
   contents: read
 jobs:

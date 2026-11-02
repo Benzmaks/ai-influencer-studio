@@ -46,7 +46,8 @@ test('authenticated projects, immutable character history, navigation and archiv
       .getByRole('link', { name: label, exact: false })
       .click();
     await expect(page.getByRole('heading', { name: label, exact: true })).toBeVisible();
-    await expect(page.getByText('Planned', { exact: true }).first()).toBeVisible();
+    if (label !== 'Scenes')
+      await expect(page.getByText('Planned', { exact: true }).first()).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);

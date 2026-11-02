@@ -2,11 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
 const modules: Record<string, [string, string, string]> = {
-  scenes: [
-    'Scenes',
-    'Set the scene. Tell a story.',
-    'Structured locations, outfits, lighting and continuity checks.',
-  ],
   images: [
     'Images',
     'A new perspective, every time.',
