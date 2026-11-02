@@ -9,7 +9,7 @@ Phase 5 merge verified at `73e68ad` (PR #5), including security maintenance
 - Prisma client generation, TypeScript, lint and zero-vulnerability npm audit.
 - 67/67 unit tests in ten suites, preserving all prior 61 tests and adding six
   storyboard/continuity/provider/range-response tests.
-- Full local PostgreSQL/Redis integration run: 45/45 in six suites, including all
+- Full local PostgreSQL/Redis integration run: 45/45 in six suites before the final archival test was added, including all
   previous 36 tests and nine new video tests. Actual video/image workers are
   killed and recovered through BullMQ; no recovery test is simulated by merely
   editing a status flag. Also covered: immutable shots/revisions/provenance,
@@ -36,8 +36,25 @@ A final archival-preservation test extends the integration suite to 46. Its
 local full run passed **45/46**, including all ten video tests; the existing
 foundation repeated-disconnect check timed out under the experimental adapter.
 This final local run is not reported as fully passing. The supported native
-matrix will verify all 46 tests before completion. Final source/CI/updater
-references will be recorded after that run.
+matrix **passed all 46 integration tests on both runtimes**, independently of
+that local limitation: https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41445859763
+(7m 15s), implementation `c32e31c`. The same run also passed locked install,
+native migration preservation/redeployment/seed, audit, 67 unit tests, lint/types/
+format, production build/auth and 24 desktop/mobile browser tests, now including
+actual MP4 playback. No checks were skipped.
+
+The Mac updater pins final application snapshot `4545360e784ce17e169678824bf84a324bd3989d`,
+which also renders new video timestamps as deterministic UTC. An additional
+live private preview check verified actual desktop/mobile playback, mock poster,
+saved-board deep links, invalid-Origin rejection and a different mobile locale/
+timezone (`en-GB`, `America/Los_Angeles`). Desktop/mobile captures were inspected.
+The web preview remains bound to 127.0.0.1:3000 with the shared mock media worker.
+There is no user-facing cloud port-preview tool. Mac updater Bash syntax, ZIP
+entries/byte equality and inherited launcher-root normalization were verified.
+
+Final branch CI rechecks the same full suite after the documentation/updater
+commit. Use the [branch Actions page](https://github.com/Benzmaks/ai-influencer-studio/actions?query=branch%3Aphase-6-video-studio)
+for that head's status; the exact final outcome is also reported with the PR.
 
 ## Failures and unavailable checks
 

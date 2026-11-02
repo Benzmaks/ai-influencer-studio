@@ -121,3 +121,13 @@ settings conflicts rather than creating a second request.
 
 See [phase-6-validation.md](phase-6-validation.md) for actual test evidence and
 [development.md](development.md) for private startup instructions.
+
+
+## Remaining operational boundaries
+
+A hard interruption after a private file write but before its database commit
+can leave an unreferenced private file, as in Phase 5. Fenced database slots
+prevent duplicate committed outputs; orphan cleanup and retention policy remain
+future work. Production OIDC, paid-provider budgets/reconciliation, S3 transport
+and physical backup restoration are not production-ready claims of this phase.
+New video timestamps use explicit UTC to keep SSR and browser locales consistent.

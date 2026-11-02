@@ -166,3 +166,21 @@ checks described above, and `npm run test:e2e` with a running mock worker.
 `MOCK_VIDEO_DELAY_MS` optionally delays the fixed mock (bounded at 10 seconds),
 for development recovery testing only. The cloud's SQL fixture/native engine
 limitations remain explicitly documented; hosted native CI is the migration gate.
+
+
+For your existing Monterey setup, [download the Phase 6 preview updater](https://github.com/Benzmaks/ai-influencer-studio/raw/refs/heads/phase-6-video-studio/downloads/Phase-6-Monterey-Preview.zip),
+extract into Downloads, then run:
+
+```bash
+/bin/bash "$HOME/Downloads/Phase 6 Preview/Preview Phase 6.command"
+```
+
+Keep Postgres.app installed. This source-pinned helper takes a private backup,
+retains credentials/local assets, applies the additive video migration and starts
+the app, Redis and shared media worker. Use your existing login at
+http://localhost:3000; the starter copies the password to your clipboard. No
+Docker, Homebrew, ffmpeg installation or paid keys are needed. Source and private
+configuration must stay separate. The cloud has no user-facing port preview;
+this private Mac updater is the supported visual preview route. Merging GitHub
+does not update the Mac automatically. Physical Mac execution/restoration has
+not been verified from the cloud.
