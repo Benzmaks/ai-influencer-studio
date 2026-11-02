@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: documentation milestone only. No Phase 1 implementation is authorized by this document. The master requirements are in [product-specification.md](product-specification.md); architecture and persistence contracts are in [architecture.md](architecture.md) and [data-model.md](data-model.md).
+Status: Phase 1 was explicitly authorized and is implemented on `phase-1-foundation`; see [development.md](development.md) and [phase-1-validation.md](phase-1-validation.md). Later phases are plans, not implemented features. The master requirements are in [product-specification.md](product-specification.md); architecture and persistence contracts are in [architecture.md](architecture.md) and [data-model.md](data-model.md).
 
 ## Shared completion gate
 
@@ -115,4 +115,4 @@ Acceptance criteria:
 
 ## Decisions and scope still open
 
-Phase 1 can start on explicit authorization. Exact dependency versions must be pinned during bootstrap, not guessed here. Production OIDC/provider/model choices, hosting, budget limits, social platforms, retention and backup objectives remain open. These do not block the mock foundation, but they gate real paid operations and production readiness. No application code is included in this milestone.
+Phase 1 implementation is ready for review, subject to the validation report and GitHub workflow status. Dependency versions are pinned in the package lock. Production OIDC/provider/model choices, hosting, budget limits, social platforms, retention and backup objectives remain open. These do not block the mock foundation, but they gate real paid operations and production readiness. Phase 2 must not begin without explicit authorization.

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: proposed implementation contract; documentation only. No application, database, authentication, workers, or CI currently exists. The complete original requirements are preserved verbatim in [product-specification.md](product-specification.md). This design also incorporates the subsequent documentation-milestone requirements. Phase boundaries and gates are in [implementation-plan.md](implementation-plan.md).
+Status: Phase 1 application, database, development authentication, mock ports and CI configuration are implemented. Generation workers and later modules below remain architectural plans. See [development.md](development.md) for actual commands and compatibility decisions. The complete original requirements are preserved verbatim in [product-specification.md](product-specification.md). This design also incorporates the subsequent documentation-milestone requirements. Phase boundaries and gates are in [implementation-plan.md](implementation-plan.md).
 
 ## Stack and runtime boundaries
 
@@ -11,23 +11,23 @@ Status: proposed implementation contract; documentation only. No application, da
 - Server-side language, image and video provider adapters, selected through a registry. Mock adapters are the default and require no paid credentials.
 - Auth.js is the proposed authentication integration. Phase 1 uses a development-only credentials adapter with securely hashed seeded credentials and signed sessions; a production OIDC provider must be selected and validated before deployment. Development credentials must fail closed in production.
 
-Pin supported stable versions and commit the package lock during Phase 1 after checking Node, Next.js, Prisma and BullMQ compatibility. These documents do not claim packages are installed or tested.
+Dependencies and the npm lockfile are pinned. The native Prisma default, isolated experimental development path and Auth.js beta are documented in [development.md](development.md); production approval remains a separate gate.
 
 ## Application modules
 
 Use framework conventions: `app/` for routes/layouts, `components/` for shared presentation, `features/` for domain features, `lib/` for cross-cutting services, `ai/` for orchestration and provider adapters, `database/` for Prisma/schema support, `workers/`, `storage/`, `docs/` and `tests/`. Do not create empty directory trees merely to match this proposal.
 
-| Module | Responsibility |
-| --- | --- |
-| Projects and access | Membership, project selection, authorization and scoped queries |
-| Characters | Guided choices, Character DNA, Visual Bible, Brand DNA, Realism DNA and Social Voice |
-| Scenes | Structured concepts, camera/lighting, versioned overrides and continuity decisions |
-| Prompts | Deterministic positive/negative prompt composition with versioned rules |
-| Generations | Provider selection, capabilities, idempotency, batch orchestration and cost-sensitive retries |
-| Images and videos | Generation/edit requests, variations, comparisons, storyboards and source references |
-| Assets | Private objects, metadata, favorites, tags, collections, comparison and version lineage |
-| Content | Character voice, posts, captions, asset references and calendar state |
-| Automations | Versioned workflow definitions and execution of authorized domain actions |
+| Module              | Responsibility                                                                                |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| Projects and access | Membership, project selection, authorization and scoped queries                               |
+| Characters          | Guided choices, Character DNA, Visual Bible, Brand DNA, Realism DNA and Social Voice          |
+| Scenes              | Structured concepts, camera/lighting, versioned overrides and continuity decisions            |
+| Prompts             | Deterministic positive/negative prompt composition with versioned rules                       |
+| Generations         | Provider selection, capabilities, idempotency, batch orchestration and cost-sensitive retries |
+| Images and videos   | Generation/edit requests, variations, comparisons, storyboards and source references          |
+| Assets              | Private objects, metadata, favorites, tags, collections, comparison and version lineage       |
+| Content             | Character voice, posts, captions, asset references and calendar state                         |
+| Automations         | Versioned workflow definitions and execution of authorized domain actions                     |
 
 The primary navigation contains Dashboard, Characters, Scenes, Images, Videos, Content, Assets, Automations and Settings. Project selection is available in the shell. Unimplemented screens explicitly say “Planned”; they must not imply that generation, scheduling or publishing works. The interface uses responsive cards, grids, wizards, metadata panels and progress indicators, rather than a chat-first layout.
 
@@ -75,3 +75,7 @@ Every resource lookup and mutation must enforce project membership, including as
 Development targets one web process, one worker, PostgreSQL, Redis and local storage. Production requires a Node-compatible web host, a persistent worker host, managed database/Redis, private S3-compatible storage, TLS, backups and secret management. Do not assume a serverless web deployment can host BullMQ workers or preserve local assets.
 
 Before production select the OIDC provider and deployment host, initial paid providers/models, asset retention/deletion policy, quotas/budgets and operational backup targets. Initial mock development is not blocked by these choices. Repository contribution rules currently contain no direct-push restriction; server-enforced branch protection must still be respected.
+
+## PR #1 compatibility review
+
+The supported default now uses the aligned Prisma 6.19.3 CLI/client native engines, with no pg adapter at runtime or in migrations. The mixed-major pg adapter 7.10.1 / Prisma 6 WASM path is a local-only, explicitly unsupported opt-in and is forbidden in production and CI. See [phase-1-review.md](phase-1-review.md) for source evidence, the migration-preservation procedure and hosted CI findings. No migration SQL, data model ownership or historical snapshots were changed by this configuration review.
