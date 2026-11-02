@@ -29,3 +29,7 @@ Object storage is not transactional with PostgreSQL: a hard kill in the narrow p
 ## Final browser and hosted CI evidence
 
 Final aligned browser: 16/16 passed. Corrected hosted native CI: https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41415547867 . Its conclusion is verified before reporting native success; see the final report for the latest review-head run status.
+
+## Monterey launcher follow-up
+
+The user's actual Mac run exposed a launcher relocation error: copied foundation scripts under `.local` still resolved their directory as the application root, attempting `.local/source/.env`. The updater now adjusts only the exact original directory line in both foundation launchers to their parent directory. The patch is idempotent and leaves credentials/data untouched. A shell regression check verified both launcher headers from another working directory with spaces in the Studio path, plus repeated application; ZIP integrity and Bash syntax also passed. Full physical Mac startup still requires the user's retry. Native CI for the original final implementation `98573a9` passed: https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41416145343 .

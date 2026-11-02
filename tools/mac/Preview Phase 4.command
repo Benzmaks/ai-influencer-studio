@@ -74,6 +74,11 @@ chmod 600 "$APP/source/.env"
 unset REDIS_PASSWORD STUDIO_PRIVATE_REDIS_URL
 [ -f "$APP/.local/Start Foundation.command" ] || cp "$APP/Start Studio.command" "$APP/.local/Start Foundation.command"
 [ -f "$APP/.local/Stop Foundation.command" ] || cp "$APP/Stop Studio.command" "$APP/.local/Stop Foundation.command"
+# Foundation launchers are stored one directory below their original location.
+# Normalize only the original exact cd line; this is safe on repeated updates.
+for launcher in "$APP/.local/Start Foundation.command" "$APP/.local/Stop Foundation.command"; do
+ sed -i '' 's|^cd "$(dirname "$0")"$|cd "$(dirname "$0")/.."|' "$launcher"
+done
 cp "$APP/source/tools/mac/Start Phase 4 services.command" "$APP/Start Studio.command"
 cp "$APP/source/tools/mac/Stop Phase 4 services.command" "$APP/Stop Studio.command"
 /bin/bash "$APP/Start Studio.command"
