@@ -93,3 +93,7 @@ The Character module now includes the ten-step creator, private resumable drafts
 ## Phase 4 image production
 
 `features/generation` owns strict input validation, project-scoped CRUD, effective immutable request references, idempotency and transactional quotas/outbox creation. `workers/run.ts` runs BullMQ consumers and periodic PostgreSQL outbox repair outside HTTP. `workers/processor.ts` fences commits with durable leases, writes private storage and preserves successful slots through recovery/retry. `ai/mock-raster.ts` produces deterministic labeled PNG test patterns; real adapters remain disabled. Image/asset APIs enforce server authorization and checksum-verified downloads. See image-generation.md.
+
+## Phase 5 editing and asset history
+
+`ai/edit-engine` plans conservative mock edits and locks exact saved character references. `features/assets` provides project-scoped editor submission, byte-copy jobs, lineage validation, library search/filtering, comparisons and revision-guarded final selection. Existing generation/outbox/worker/storage boundaries remain in use; editing is not performed inside HTTP handlers. `/assets/[id]` and `/assets/compare` add the editor/tree and responsive comparison strip. AssetSelection is separate from immutable source bytes/metadata, and SQL triggers prevent lineage rewrites and invalid final candidates. See image-editing.md.

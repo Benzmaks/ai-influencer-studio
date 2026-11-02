@@ -22,7 +22,9 @@
     "format:check": "prettier --check app components lib features ai workers storage database tests scripts *.ts *.mts *.mjs",
     "test:production": "tsx scripts/check-production-auth.ts",
     "test:migrations": "tsx scripts/check-migrations.ts",
-    "worker": "tsx workers/run.ts"
+    "worker": "tsx workers/run.ts",
+    "postinstall": "node scripts/prepare-lint-compat.mjs",
+    "audit:dependencies": "npm audit --audit-level=moderate --fetch-retries=0 --fetch-timeout=20000"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",
@@ -53,5 +55,9 @@
     "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.0",
+    "minimatch": "11.0.1"
   }
 }

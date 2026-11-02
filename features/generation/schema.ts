@@ -9,6 +9,9 @@ export const generationInput = z
     model: z.literal('studio-sample-v1'),
     seed: z.number().int().min(0).max(2147483600),
     sourceAssetId: z.string().min(1).optional(),
+    operation: z.enum(['generate', 'variations', 'edit', 'duplicate']).optional(),
+    instruction: z.string().trim().min(5).max(1500).optional(),
+    editScope: z.literal('scene-only').optional(),
     variationStrength: z.enum(['subtle', 'balanced', 'bold']).default('balanced'),
   })
   .strict();
@@ -18,7 +21,7 @@ export const imageCapabilities = {
   id: 'mock-image',
   mock: true,
   models: ['studio-sample-v1'],
-  operations: ['generate', 'variations'],
+  operations: ['generate', 'variations', 'edit'],
   batchSizes: [1, 2, 4, 8],
   aspectRatios: ['1:1', '4:5', '9:16', '16:9'],
   variationStrengths: ['subtle', 'balanced', 'bold'],

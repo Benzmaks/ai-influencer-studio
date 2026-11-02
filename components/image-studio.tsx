@@ -552,6 +552,9 @@ export function ImageStudio({
                             </button>
                           )}
                         </div>
+                        <Link className="button" href={`/assets/${a.id}`}>
+                          {canWrite ? 'Edit & history' : 'View history'}
+                        </Link>
                         <details>
                           <summary>Generation details</summary>
                           <p>
