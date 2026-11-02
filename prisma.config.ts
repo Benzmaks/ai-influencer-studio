@@ -5,7 +5,7 @@ import { experimentalPrismaAllowed } from './lib/prisma-mode';
 const experimental = experimentalPrismaAllowed();
 if (experimental)
   console.warn(
-    'LOCAL EXPERIMENT ONLY: Prisma 6 schema WASM + pg adapter 7 is not a supported release configuration.',
+    'LOCAL EXPERIMENT ONLY: Prisma 6 WASM schema engine is not the supported migration path; use native/classic engines.',
   );
 export default defineConfig({
   schema: 'prisma/schema.prisma',

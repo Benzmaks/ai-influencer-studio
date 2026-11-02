@@ -43,3 +43,6 @@ Production remains blocked on OIDC and deployment-specific controls; the beta pi
 - Installed `next-auth/package.json` supplies the Next.js/React peer ranges; `@auth/core` sources confirm default secure-cookie selection from HTTPS and unchanged CSRF handling. No skip-CSRF or permissive redirect override was introduced.
 - Original migration SHA-256 remains `34da05cf4eba97d4d46ce39d19b30382bbb95513af8b370cc5a38bcd8309fb26`; no migration or master-specification diff exists relative to the original PR head.
 - Local checks passed with explicit experimental development opt-in; the separately observed hosted native runs above establish the release/default-path checks. No production deployment or backup restoration of a real target was performed.
+
+
+Phase 4 addendum: the historical adapter 7 experiment above is superseded by adapter 6.19.3 aligned with the existing client/CLI. Runtime transaction/reconnection checks pass; its WASM schema migration mode cannot decode PostgreSQL catalog `name`, so native migration engines remain required. No old migration files or data were rewritten. See phase-4-validation.md.

@@ -2,11 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
 const modules: Record<string, [string, string, string]> = {
-  images: [
-    'Images',
-    'A new perspective, every time.',
-    'Image generation, variations and editing with preserved originals.',
-  ],
   videos: [
     'Videos',
     'Bring your world to life.',
@@ -16,11 +11,6 @@ const modules: Record<string, [string, string, string]> = {
     'Content',
     'Find your character’s voice.',
     'Captions, social concepts and an asset-connected calendar.',
-  ],
-  assets: [
-    'Assets',
-    'Everything, beautifully organized.',
-    'Your private library of references, versions and creative work.',
   ],
   automations: [
     'Automations',

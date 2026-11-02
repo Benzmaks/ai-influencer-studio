@@ -15,3 +15,7 @@ Before applying to a populated local installation, stop the web app and take a p
 ## Phase 3 scenes
 
 `202611020003_scenes` adds project-shared Scene and immutable SceneVersion records. Exact character references use same-project composite foreign keys. Every draft/ready save appends a version in the transaction that advances Scene.revision; stale writes fail. Original character and draft tables/migrations are untouched. SQL blocks updating scene snapshots. See prompt-engine.md for persistence semantics and phase-3-validation.md for populated Phase 1/2 upgrade evidence.
+
+## Phase 4 jobs and images
+
+`202611020004_images` adds Generation, GenerationOutbox and ImageAsset and a unique SceneVersion reference index without rewriting old migrations or snapshots. Generation pins same-project exact scene and character versions and stores an immutable effective input snapshot through service boundaries. A unique project/idempotency key and serializable transactions prevent duplicates and quota races. Mutable status/progress/lease/cancellation/retry fields implement orchestration. The outbox is created atomically with pending result slots. Unique generation/index keeps each slot singular; same-project source FKs preserve variation lineage. Asset review is separate from its original bytes/checksum/metadata. Downloads are private and checksum-verified. See image-generation.md for fencing, recovery and the object-store transaction boundary.

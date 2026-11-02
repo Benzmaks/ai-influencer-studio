@@ -163,3 +163,9 @@ describe('PostgreSQL foundation and project boundaries', () => {
     ).rejects.toMatchObject({ status: 404 });
   });
 });
+
+it('reinitializes the lazy database client after repeated disconnects', async () => {
+  await db.$disconnect();
+  await db.$disconnect();
+  expect(await db.project.count({ where: { id: projectId } })).toBe(1);
+});

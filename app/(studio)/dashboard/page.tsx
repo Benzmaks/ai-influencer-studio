@@ -91,7 +91,7 @@ export default async function Dashboard() {
       )}
       <div className="section-title">
         <h2>Your creative toolkit</h2>
-        <span className="badge">Scenes available · More to come</span>
+        <span className="badge">Scenes & Images available · More to come</span>
       </div>
       <div className="grid">
         {[
@@ -100,7 +100,9 @@ export default async function Dashboard() {
           ['Content studio', 'Give your character a voice.', '/content'],
         ].map(([name, desc, href]) => (
           <Link className="panel" href={href} key={href}>
-            <span className="eyebrow">{href === '/scenes' ? 'AVAILABLE' : 'PLANNED MODULE'}</span>
+            <span className="eyebrow">
+              {['/scenes', '/images'].includes(href) ? 'AVAILABLE' : 'PLANNED MODULE'}
+            </span>
             <h3>{name} ↗</h3>
             <p>{desc}</p>
           </Link>

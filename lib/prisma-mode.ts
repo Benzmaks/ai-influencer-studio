@@ -1,4 +1,4 @@
-/** The mixed-major adapter path is an explicit local fallback, never a release configuration. */
+/** The experimental WASM path is an explicit local fallback, never a release configuration. */
 export function experimentalPrismaAllowed(
   source: Record<string, string | undefined> = process.env,
 ) {

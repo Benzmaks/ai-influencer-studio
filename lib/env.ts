@@ -21,6 +21,11 @@ export function readEnvironment(source: Record<string, string | undefined> = pro
     IMAGE_PROVIDER: z.literal('mock').default('mock'),
     VIDEO_PROVIDER: z.literal('mock').default('mock'),
     STORAGE_DRIVER: z.literal('local').default('local'),
+    IMAGE_QUEUE_NAME: z
+      .string()
+      .regex(/^[a-zA-Z0-9_-]{1,100}$/)
+      .default('studio-images'),
+    MOCK_IMAGE_DELAY_MS: z.coerce.number().int().min(0).max(10000).default(0),
     LOCAL_STORAGE_DIR: z.string().min(1).default('.local/assets'),
   });
   const result = schema.safeParse(source);

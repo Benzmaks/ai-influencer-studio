@@ -4,7 +4,7 @@ Phase 1 is implemented on the `phase-1-foundation` branch. The reproducible comm
 
 ## Runtime and dependencies
 
-Node 24.19.0/npm, Next.js 16.4.3 App Router, React 19.3.1, TypeScript 5.9.3, Prisma client/CLI 6.19.3, native Prisma engines (with pg adapter 7.10.1 retained only for an explicitly experimental local path), PostgreSQL 17.6 and Redis 7.4.6. Auth.js 5.0.0-beta.32 uses JWT credentials sessions in development. Zod validates inputs, bcrypt hashes local passwords, Vitest and Playwright validate behavior. BullMQ is installed; worker/job implementation belongs to Phase 4.
+Node 24.19.0/npm, Next.js 16.4.3 App Router, React 19.3.1, TypeScript 5.9.3, Prisma client/CLI 6.19.3, native Prisma engines (with matching pg adapter 6.19.3 retained only for an explicitly experimental local query-engine path), PostgreSQL 17.6 and Redis 7.4.6. Auth.js 5.0.0-beta.32 uses JWT credentials sessions in development. Zod validates inputs, bcrypt hashes local passwords, Vitest and Playwright validate behavior. BullMQ image workers/outbox are implemented in Phase 4; Redis is required for image generation. Native Prisma is required for migrations.
 
 `compose.yaml` starts loopback-bound PostgreSQL/Redis with health checks and retained data volumes. Existing managed services can be selected instead. Never use the sample Compose password in production. Local private asset files live under `.local/assets`; the S3-compatible production interface is defined but its transport is planned.
 
