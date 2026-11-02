@@ -49,6 +49,7 @@ afterAll(async () => {
     select: { id: true },
   });
   await db.$transaction(async (tx) => {
+    await tx.characterDraft.deleteMany({ where: { projectId: { in: projects } } });
     await tx.character.updateMany({
       where: { projectId: { in: projects } },
       data: { currentVersionId: null },

@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireMembership } from '@/lib/access';
 import { AppError } from '@/lib/errors';
+import { readSnapshot } from './dna';
+import { compileCharacter } from '@/ai/character-engine';
 export const characterInput = z.object({
   name: z.string().trim().min(2, 'Name needs at least 2 characters.').max(80),
   displayName: z.string().trim().min(2).max(80),
@@ -66,6 +68,14 @@ export async function updateCharacter(
     });
     if (changed.count !== 1)
       throw new AppError(409, 'Character changed or was archived. Refresh before editing.');
+    const previous = await tx.character.findUniqueOrThrow({
+      where: { id },
+      include: { currentVersion: true },
+    });
+    const previousDNA = readSnapshot(previous.currentVersion?.snapshot);
+    const snapshot = previousDNA
+      ? await compileCharacter({ ...previousDNA.answers, ...data })
+      : { identity: data, schemaVersion: 1 };
     const version = await tx.characterVersion.create({
       data: {
         ...data,
@@ -73,7 +83,8 @@ export async function updateCharacter(
         characterId: id,
         versionNumber: revision + 1,
         createdBy: userId,
-        snapshot: { identity: data, schemaVersion: 1 },
+        snapshot,
+        schemaVersion: previousDNA ? 2 : 1,
       },
     });
     await tx.auditEvent.create({
@@ -102,5 +113,43 @@ export async function archiveCharacter(
     if (changed.count !== 1)
       throw new AppError(409, 'Character changed or was already archived. Refresh and try again.');
     return { archived: true };
+  });
+}
+
+export async function duplicateCharacter(userId: string, projectId: string, id: string) {
+  await requireMembership(userId, projectId, 'write');
+  const original = await getCharacter(userId, projectId, id);
+  const version = original.currentVersion;
+  if (!version) throw new AppError(409, 'Character has no saved version.');
+  const dna = readSnapshot(version.snapshot);
+  const name = version.name.slice(0, 70) + ' (copy)';
+  const displayName = version.displayName.slice(0, 70) + ' (copy)';
+  if (!dna) return createCharacter(userId, projectId, { ...version, name, displayName });
+  const snapshot = await compileCharacter({ ...dna.answers, name, displayName });
+  const a = snapshot.answers;
+  return db.$transaction(async (tx) => {
+    await requireMembership(userId, projectId, 'write', tx);
+    const c = await tx.character.create({ data: { projectId, name } });
+    const v = await tx.characterVersion.create({
+      data: {
+        projectId,
+        characterId: c.id,
+        versionNumber: 1,
+        schemaVersion: 2,
+        name,
+        displayName,
+        age: a.age,
+        location: a.location,
+        occupation: a.occupation,
+        bio: a.bio,
+        snapshot,
+        createdBy: userId,
+      },
+    });
+    return tx.character.update({
+      where: { id: c.id },
+      data: { currentVersionId: v.id },
+      include: { currentVersion: true },
+    });
   });
 }

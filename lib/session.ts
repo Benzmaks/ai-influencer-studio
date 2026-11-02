@@ -14,6 +14,15 @@ export async function pageUser() {
 export function verifyOrigin(request: Request) {
   const origin = request.headers.get('origin');
   const expected = process.env.AUTH_URL;
-  if (!expected || origin !== new URL(expected).origin)
-    throw new AppError(403, 'Request origin is not allowed.');
+  if (!expected)
+    throw new AppError(
+      503,
+      'The studio browser address is not configured. Restart the studio using its starter.',
+    );
+  const studioOrigin = new URL(expected).origin;
+  if (origin !== studioOrigin)
+    throw new AppError(
+      403,
+      `Open your studio at ${studioOrigin}, sign in there and try again. This browser address does not match the configured studio address.`,
+    );
 }

@@ -22,6 +22,7 @@ model User {
   accounts Account[]
   sessions Session[]
   memberships ProjectMembership[]
+  drafts CharacterDraft[]
 }
 model Account {
   id String @id @default(cuid())
@@ -59,6 +60,7 @@ model Project {
   updatedAt DateTime @updatedAt
   memberships ProjectMembership[]
   characters Character[]
+  drafts CharacterDraft[]
   auditEvents AuditEvent[]
 }
 model ProjectMembership {
@@ -80,6 +82,7 @@ model Character {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   project Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  drafts CharacterDraft[]
   versions CharacterVersion[] @relation("History")
   currentVersion CharacterVersion? @relation("Current", fields: [projectId, id, currentVersionId], references: [projectId, characterId, id], onDelete: Restrict, onUpdate: NoAction)
   @@unique([projectId, id])
@@ -116,4 +119,22 @@ model AuditEvent {
   createdAt DateTime @default(now())
   project Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
   @@index([projectId, createdAt])
+}
+
+model CharacterDraft {
+  id String @id @default(cuid())
+  projectId String
+  createdBy String
+  characterId String?
+  baseRevision Int?
+  answers Json
+  step Int @default(0)
+  revision Int @default(1)
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+  author User @relation(fields:[createdBy],references:[id],onDelete:Cascade)
+  character Character? @relation(fields:[projectId,characterId],references:[projectId,id],onDelete:Restrict)
+  @@index([projectId,createdBy,completedAt,updatedAt])
 }
