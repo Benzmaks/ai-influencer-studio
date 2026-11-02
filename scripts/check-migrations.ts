@@ -152,8 +152,21 @@ async function main() {
     await pool.query(
       `INSERT INTO "ImageAsset" (id,"projectId","generationId",index,status,key,checksum,"mimeType",size,metadata,"updatedAt") VALUES ('migration-image','migration-project','migration-generation',0,'completed','migration-project/fixture','original-checksum','image/png',8,'{"mock":true}'::jsonb,NOW())`,
     );
+    // Populate the existing Phase 5 final-selection history before the additive video migration.
+    const fifth = '202611020005_asset_history';
+    await mkdir(path.join(upgradeRoot, 'migrations', fifth), { recursive: true });
+    await copyFile(
+      path.resolve('prisma/migrations', fifth, 'migration.sql'),
+      path.join(upgradeRoot, 'migrations', fifth, 'migration.sql'),
+    );
+    await migrate(configPath);
+    await pool.query(
+      `INSERT INTO "AssetSelection" ("projectId","rootAssetId","assetId","updatedBy","updatedAt") VALUES ('migration-project','migration-image','migration-image','migration-owner',NOW())`,
+    );
     async function contents() {
       return {
+        selections: (await pool!.query('SELECT * FROM "AssetSelection" ORDER BY "rootAssetId"'))
+          .rows,
         assets: (await pool!.query('SELECT * FROM "ImageAsset" ORDER BY id')).rows,
         generations: (await pool!.query('SELECT * FROM "Generation" ORDER BY id')).rows,
         scenes: (await pool!.query('SELECT * FROM "Scene" ORDER BY id')).rows,
@@ -180,9 +193,27 @@ async function main() {
       'Existing original asset metadata, parent and checksum preserved.',
     );
     assert.deepEqual(
-      upgraded.generations,
+      upgraded.generations.map(({ kind, storyboardId, storyboardRevisionId, ...row }) => {
+        assert.equal(kind, 'image');
+        assert.equal(storyboardId, null);
+        assert.equal(storyboardRevisionId, null);
+        return row;
+      }),
       beforeUpgrade.generations,
       'Generation history preserved.',
+    );
+    assert.deepEqual(
+      upgraded.selections,
+      beforeUpgrade.selections,
+      'Existing Phase 5 final selections preserved.',
+    );
+    assert.equal(
+      (await pool.query('SELECT COUNT(*)::int AS count FROM "Storyboard"')).rows[0].count,
+      0,
+    );
+    assert.equal(
+      (await pool.query('SELECT COUNT(*)::int AS count FROM "VideoAsset"')).rows[0].count,
+      0,
     );
     assert.deepEqual(upgraded.scenes, beforeUpgrade.scenes, 'Scene records preserved.');
     assert.deepEqual(
@@ -206,7 +237,9 @@ async function main() {
       'Upgrade preserves project memberships.',
     );
     assert.deepEqual(
-      upgraded.history.filter((row) => [first, second, third, fourth].includes(row.migration_name)),
+      upgraded.history.filter((row) =>
+        [first, second, third, fourth, fifth].includes(row.migration_name),
+      ),
       beforeUpgrade.history,
       'Original migration history is unchanged.',
     );
@@ -230,7 +263,7 @@ async function main() {
     assert.equal(update.rowCount, 0);
     assert.deepEqual(await contents(), original, 'Original snapshots must remain immutable.');
     console.log(
-      'PASS: Phase 1-to-Phase 2-to-Phase 3-to-Phase 4-to-current upgrade, preserved DNA drafts, migration checksums, populated redeployment, canonical pointer, membership and immutable snapshots verified in an isolated database.',
+      'PASS: Phase 1-to-Phase 2-to-Phase 3-to-Phase 4-to-Phase 5-to-current video upgrade, preserved DNA drafts, migration checksums, populated redeployment, canonical pointer, membership and immutable snapshots verified in an isolated database.',
     );
   } finally {
     await pool?.end();

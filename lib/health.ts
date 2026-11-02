@@ -15,6 +15,8 @@ export async function health() {
   try {
     await db.$queryRaw`SELECT 1`;
     await db.project.count();
+    await db.storyboard.count();
+    await db.videoAsset.count();
     checks.postgresql = 'ready';
   } catch {
     checks.postgresql = 'Start PostgreSQL, check DATABASE_URL and run npm run db:migrate.';

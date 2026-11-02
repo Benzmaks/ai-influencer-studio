@@ -7,6 +7,9 @@ export interface ProviderCapabilities {
   operations: readonly Operation[];
   batchSizes: readonly number[];
   maxDurationSeconds?: number;
+  supportedDurations?: readonly number[];
+  audio?: boolean;
+  storyboard?: 'per-shot' | 'assembled';
   aspectRatios?: readonly string[];
   variationStrengths?: readonly string[];
 }
@@ -49,6 +52,7 @@ export interface ImageProvider {
   createVariations(input: MediaInput, options?: ProviderContext): Promise<MediaOutput[]>;
 }
 export interface VideoProvider {
+  createVariations?(input: MediaInput, options?: ProviderContext): Promise<MediaOutput[]>;
   capabilities: ProviderCapabilities;
   generate(input: MediaInput, options?: ProviderContext): Promise<MediaOutput[]>;
   edit?(input: MediaInput, options?: ProviderContext): Promise<MediaOutput[]>;
@@ -80,6 +84,12 @@ export function requireCapability(
     (!Number.isFinite(input.durationSeconds) ||
       input.durationSeconds <= 0 ||
       input.durationSeconds > (capabilities.maxDurationSeconds ?? 0))
+  )
+    throw new Error('Unsupported duration.');
+  if (
+    input.durationSeconds !== undefined &&
+    capabilities.supportedDurations &&
+    !capabilities.supportedDurations.includes(input.durationSeconds)
   )
     throw new Error('Unsupported duration.');
   if (['edit', 'variations', 'image-to-video'].includes(operation) && !input.source?.length)

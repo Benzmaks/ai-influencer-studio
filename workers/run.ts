@@ -9,10 +9,10 @@ const worker = imageWorker();
 let busy = false,
   closing = false;
 worker.on('error', () =>
-  console.error('Image worker connection needs attention. Check PostgreSQL and REDIS_URL.'),
+  console.error('Media worker connection needs attention. Check PostgreSQL and REDIS_URL.'),
 );
 queue.on('error', () =>
-  console.error('Image queue unavailable. Jobs remain durable in PostgreSQL; start Redis.'),
+  console.error('Media queue unavailable. Jobs remain durable in PostgreSQL; start Redis.'),
 );
 async function tick() {
   if (busy || closing) return;
@@ -27,7 +27,7 @@ async function tick() {
 }
 const timer = setInterval(() => void tick(), 1000);
 void tick();
-console.log('Mock image worker started. No paid providers enabled.');
+console.log('Mock image/video worker started. No paid providers enabled.');
 async function stop() {
   if (closing) return;
   closing = true;

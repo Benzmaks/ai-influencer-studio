@@ -130,3 +130,57 @@ plugins; do not disable lifecycle scripts during normal setup. Run
 `npm run audit:dependencies` to check current advisories. Full and production-only
 audits reported zero findings after remediation. Node 22's intentional preview
 engine notice and ESLint 9's maintenance notice are separate from vulnerabilities.
+
+
+## Phase 6 Video Studio
+
+Keep the existing private PostgreSQL, Redis and storage configuration. Stop the
+app and worker before updating source; back up populated data; run `npm ci`,
+`npm run db:generate`, native `npm run db:migrate`, repeatable `npm run db:seed`
+and `npm run health`. Restart `npm run worker` and, separately,
+`npm run dev -- --hostname 127.0.0.1`. The existing worker now handles images and
+videos; no extra worker binary, ffmpeg installation or paid keys are required.
+Retain the exact AUTH_URL origin and private login. Never expose development
+authentication publicly. The inherited dependency security fixes remain enabled.
+
+Visual test: create a complete Character DNA profile → save a Scene → generate
+an image and Favourite it (or select final) → Videos → choose the same exact DNA
+and Scene versions → edit shot framing/action/expression → expand facial motion
+planning and set timing → Add shot → Save draft → reload/resume → Save storyboard
+→ Generate mock video (text mode) → inspect/play/download each shot. Switch to
+Image-to-video, choose the matching approved image and generate again. Edit/save
+the storyboard; earlier generation inputs and clips remain pinned to the earlier
+revision. Inspect the immutable history and Assets' video section.
+
+Only two-second silent fixed mock clips are rendered, one per shot. Duration,
+transition, audio/dialogue and facial-motion planning do not imply synthesized
+footage or validated realistic motion. Other durations can be saved as drafts;
+video variations/editing/extension and stitched films are unsupported. See
+[video-generation.md](video-generation.md) and [phase-6-validation.md](phase-6-validation.md).
+
+Local tests need PostgreSQL and Redis; stop the normal worker before integration
+fault-injection/recovery tests. Run `npm test`, `npm run test:integration`,
+`npm run test:migrations`, `npm run lint`, `npm run typecheck`,
+`npm run format:check`, `npm run audit:dependencies`, the production build/auth
+checks described above, and `npm run test:e2e` with a running mock worker.
+`MOCK_VIDEO_DELAY_MS` optionally delays the fixed mock (bounded at 10 seconds),
+for development recovery testing only. The cloud's SQL fixture/native engine
+limitations remain explicitly documented; hosted native CI is the migration gate.
+
+
+For your existing Monterey setup, [download the Phase 6 preview updater](https://github.com/Benzmaks/ai-influencer-studio/raw/refs/heads/phase-6-video-studio/downloads/Phase-6-Monterey-Preview.zip),
+extract into Downloads, then run:
+
+```bash
+/bin/bash "$HOME/Downloads/Phase 6 Preview/Preview Phase 6.command"
+```
+
+Keep Postgres.app installed. This source-pinned helper takes a private backup,
+retains credentials/local assets, applies the additive video migration and starts
+the app, Redis and shared media worker. Use your existing login at
+http://localhost:3000; the starter copies the password to your clipboard. No
+Docker, Homebrew, ffmpeg installation or paid keys are needed. Source and private
+configuration must stay separate. The cloud has no user-facing port preview;
+this private Mac updater is the supported visual preview route. Merging GitHub
+does not update the Mac automatically. Physical Mac execution/restoration has
+not been verified from the cloud.

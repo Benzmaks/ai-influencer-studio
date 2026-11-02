@@ -1,3 +1,6 @@
+import { VideoLibrary } from '@/components/video-history';
+import type { VideoJob } from '@/components/video-types';
+import { listVideoGenerations } from '@/features/videos/service';
 import Link from 'next/link';
 import { workspace } from '@/lib/workspace';
 import { assetLibrary } from '@/features/assets/service';
@@ -6,6 +9,7 @@ import type { LibraryView } from '@/components/asset-types';
 export default async function Assets() {
   const { user, project, canWrite } = await workspace();
   const data = project ? await assetLibrary(user.id, project.id) : null;
+  const videos = project ? await listVideoGenerations(user.id, project.id) : [];
   return (
     <>
       <span className="eyebrow">YOUR PRIVATE CREATIVE LIBRARY</span>
@@ -18,6 +22,11 @@ export default async function Assets() {
           Open Image Studio
         </Link>
       </div>
+      <p>
+        <Link className="button" href="/videos">
+          Open Video Studio
+        </Link>
+      </p>
       {project && data ? (
         <AssetLibrary
           key={project.id}
@@ -27,6 +36,14 @@ export default async function Assets() {
         />
       ) : (
         <Link href="/projects">Choose a project</Link>
+      )}
+      {project && (
+        <VideoLibrary
+          key={project.id}
+          projectId={project.id}
+          initialJobs={JSON.parse(JSON.stringify(videos)) as VideoJob[]}
+          canWrite={canWrite}
+        />
       )}
     </>
   );

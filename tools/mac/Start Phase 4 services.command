@@ -33,4 +33,4 @@ if [ "$RUNNING" = false ]; then
 fi
 sleep 1
 kill -0 "$(cat "$LOCAL/worker.pid")" 2>/dev/null || fail 'The image worker stopped. Read .local/worker.log and share only its error message.'
-printf '\nImage worker and private Redis are ready. Open Images to generate clearly labeled mock test patterns. No paid AI keys are required.\n'
+printf '\nImage/video worker and private Redis are ready. Open Images or Videos for clearly labeled mock previews. No paid AI keys are required.\n'

@@ -64,6 +64,7 @@ model Project {
   auditEvents AuditEvent[]
   scenes Scene[]
   generations Generation[]
+  storyboards Storyboard[]
 }
 model ProjectMembership {
   projectId String
@@ -110,6 +111,7 @@ model CharacterVersion {
   canonicalFor Character? @relation("Current")
   sceneVersions SceneVersion[]
   generations Generation[]
+  storyboardRevisions StoryboardRevision[]
   @@unique([characterId, versionNumber])
   @@unique([projectId, characterId, id])
   @@index([projectId, characterId, createdAt])
@@ -170,12 +172,16 @@ model SceneVersion {
  scene Scene @relation(fields:[projectId,sceneId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  characterVersion CharacterVersion @relation(fields:[projectId,characterId,characterVersionId],references:[projectId,characterId,id],onDelete:Restrict,onUpdate:NoAction)
  generations Generation[]
+ storyboardRevisions StoryboardRevision[]
  @@unique([projectId,sceneId,id])
  @@unique([sceneId,versionNumber])
  @@index([projectId,characterId,characterVersionId])
 }
 
 model Generation {
+ kind String @default("image")
+ storyboardId String?
+ storyboardRevisionId String?
  id String @id @default(cuid())
  projectId String
  createdBy String
@@ -199,6 +205,8 @@ model Generation {
  characterVersion CharacterVersion @relation(fields:[projectId,characterId,characterVersionId],references:[projectId,characterId,id],onDelete:Restrict,onUpdate:NoAction)
  sceneVersion SceneVersion @relation(fields:[projectId,sceneId,sceneVersionId],references:[projectId,sceneId,id],onDelete:Restrict,onUpdate:NoAction)
  assets ImageAsset[]
+ videoAssets VideoAsset[]
+ storyboardRevision StoryboardRevision? @relation(fields:[projectId,storyboardId,storyboardRevisionId],references:[projectId,storyboardId,id],onDelete:Restrict,onUpdate:NoAction)
  outbox GenerationOutbox?
  @@unique([projectId,idempotencyKey])
  @@unique([projectId,id])
@@ -230,6 +238,7 @@ model ImageAsset {
  generation Generation @relation(fields:[projectId,generationId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  source ImageAsset? @relation("Sources",fields:[projectId,sourceAssetId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  children ImageAsset[] @relation("Sources")
+ videoSources VideoAsset[]
  rootSelections AssetSelection[] @relation("SelectedRoot")
  finalSelections AssetSelection[] @relation("SelectedImage")
  @@unique([generationId,index])
@@ -247,4 +256,79 @@ model AssetSelection {
  root ImageAsset @relation("SelectedRoot",fields:[projectId,rootAssetId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  asset ImageAsset @relation("SelectedImage",fields:[projectId,assetId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
  @@id([projectId,rootAssetId])
+}
+
+model Storyboard {
+ id String @id @default(cuid())
+ projectId String
+ title String
+ revision Int @default(1)
+ status String @default("draft")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ project Project @relation(fields:[projectId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ versions StoryboardRevision[]
+ @@unique([projectId,id])
+ @@index([projectId,updatedAt])
+}
+model StoryboardRevision {
+ id String @id @default(cuid())
+ projectId String
+ storyboardId String
+ versionNumber Int
+ title String
+ characterId String
+ characterVersionId String
+ sceneId String
+ sceneVersionId String
+ createdBy String
+ createdAt DateTime @default(now())
+ storyboard Storyboard @relation(fields:[projectId,storyboardId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
+ characterVersion CharacterVersion @relation(fields:[projectId,characterId,characterVersionId],references:[projectId,characterId,id],onDelete:Restrict,onUpdate:NoAction)
+ sceneVersion SceneVersion @relation(fields:[projectId,sceneId,sceneVersionId],references:[projectId,sceneId,id],onDelete:Restrict,onUpdate:NoAction)
+ shots StoryboardShot[]
+ generations Generation[]
+ @@unique([projectId,storyboardId,id])
+ @@unique([storyboardId,versionNumber])
+}
+model StoryboardShot {
+ id String @id @default(cuid())
+ revisionId String
+ shotNumber Int
+ duration Float
+ framing String
+ camera String
+ subject String
+ action String
+ expression String
+ environment String
+ cameraMovement String
+ transition String
+ audio String
+ dialogue String
+ performance Json
+ revision StoryboardRevision @relation(fields:[revisionId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+ @@unique([revisionId,shotNumber])
+}
+model VideoAsset {
+ id String @id @default(cuid())
+ projectId String
+ generationId String
+ index Int
+ status String @default("pending")
+ attempts Int @default(0)
+ key String?
+ checksum String?
+ mimeType String?
+ size Int?
+ metadata Json
+ sourceImageId String?
+ error String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ generation Generation @relation(fields:[projectId,generationId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
+ sourceImage ImageAsset? @relation(fields:[projectId,sourceImageId],references:[projectId,id],onDelete:Restrict,onUpdate:NoAction)
+ @@unique([generationId,index])
+ @@unique([projectId,id])
+ @@index([projectId,createdAt])
 }

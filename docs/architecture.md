@@ -97,3 +97,15 @@ The Character module now includes the ten-step creator, private resumable drafts
 ## Phase 5 editing and asset history
 
 `ai/edit-engine` plans conservative mock edits and locks exact saved character references. `features/assets` provides project-scoped editor submission, byte-copy jobs, lineage validation, library search/filtering, comparisons and revision-guarded final selection. Existing generation/outbox/worker/storage boundaries remain in use; editing is not performed inside HTTP handlers. `/assets/[id]` and `/assets/compare` add the editor/tree and responsive comparison strip. AssetSelection is separate from immutable source bytes/metadata, and SQL triggers prevent lineage rewrites and invalid final candidates. See image-editing.md.
+
+
+## Phase 6 media boundary
+
+Video Studio adds project-scoped storyboard services, immutable revisions/ordered
+shots and distinct VideoAsset outputs. Existing Generation/outbox/BullMQ delivery
+and worker entry point dispatch by kind; HTTP handlers never generate video.
+The video processor retains independent per-shot retries and fenced commits;
+image behavior remains intact. The mock capability registry advertises two-second
+per-shot silent MP4 samples and rejects unsupported derivatives. Private range
+responses support playback/download. Facial-performance planning is versioned
+data only, not motion validation. See [video-generation.md](video-generation.md).

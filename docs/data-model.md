@@ -85,3 +85,20 @@ Generation belongs to a project, pins exact CharacterVersion and SceneVersion, a
 ## Phase 5 final selections and lineage guards
 
 AssetSelection has composite primary key (projectId, rootAssetId), chosen assetId, monotonically advancing revision while present, updatedBy and updatedAt. Both image references have same-project composite FKs; a SQL ancestry trigger requires a completed, non-rejected candidate whose actual root matches. Rejecting a selected image clears its selection. Parent edges already use ImageAsset.sourceAssetId; Phase 5 makes those edges immutable and prevents new cycles by requiring an existing completed parent, self-parent rejection and no reparent operation. Completed asset bytes/checksum/metadata/status are guarded against update. New generation snapshots record operation, effective instruction/trail, scope, original root, source checksum/metadata envelope and exact preservation references. No historical character/scene/image metadata is backfilled or overwritten.
+
+
+## Implemented Phase 6 entities
+
+Storyboard is a project-shared draft/ready aggregate with optimistic revision.
+StoryboardRevision pins exact matching CharacterVersion and SceneVersion;
+StoryboardShot stores ordered explicit shot fields and versioned facial timing
+JSON. Revisions and shots are append-only in application workflows; SQL blocks
+updates and protects referenced shot membership. Generation kind defaults to
+image for historical rows; video rows require a same-project matching storyboard
+revision and retain immutable effective per-shot inputs. VideoAsset is a distinct
+private MP4 result slot with immutable generation/index, exact source ImageAsset
+ID/checksum/metadata, settings and completed output metadata. ImageAsset itself
+is the immutable image file/version established in Phase 5, so no competing
+AssetVersion identity is added. Existing outbox, lease, retry and cancellation
+fields handle both kinds. No video edit/variation lineage is created while the
+provider does not support those operations. See [video-generation.md](video-generation.md).

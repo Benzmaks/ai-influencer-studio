@@ -46,7 +46,7 @@ test('authenticated projects, immutable character history, navigation and archiv
       .getByRole('link', { name: label, exact: false })
       .click();
     await expect(page.getByRole('heading', { name: label, exact: true })).toBeVisible();
-    if (!['Scenes', 'Images', 'Assets'].includes(label))
+    if (!['Scenes', 'Images', 'Assets', 'Videos'].includes(label))
       await expect(page.getByText('Planned', { exact: true }).first()).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),

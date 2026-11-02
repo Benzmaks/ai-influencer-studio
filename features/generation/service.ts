@@ -217,7 +217,7 @@ export async function listGenerations(userId: string, projectId: string, cursor?
   if (cursor && !(await db.generation.findFirst({ where: { id: cursor, projectId } })))
     throw new AppError(404, 'Batch cursor not found.');
   return db.generation.findMany({
-    where: { projectId },
+    where: { projectId, kind: 'image' },
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     take: 30,
@@ -228,7 +228,7 @@ export async function getGeneration(userId: string, projectId: string, id: strin
   await requireMembership(userId, projectId);
   const job = await db.generation.findFirst({
     where: { id, projectId },
-    include: { assets: { orderBy: { index: 'asc' } } },
+    include: { assets: { orderBy: { index: 'asc' } }, videoAssets: { orderBy: { index: 'asc' } } },
   });
   if (!job) throw new AppError(404, 'Generation not found.');
   return job;
@@ -249,6 +249,10 @@ export async function cancelGeneration(userId: string, projectId: string, id: st
     if (!changed.count)
       throw new AppError(409, 'This batch is no longer eligible for cancellation.');
     await tx.imageAsset.updateMany({
+      where: { generationId: id, projectId, status: 'pending' },
+      data: { status: 'cancelled' },
+    });
+    await tx.videoAsset.updateMany({
       where: { generationId: id, projectId, status: 'pending' },
       data: { status: 'cancelled' },
     });
@@ -277,6 +281,10 @@ export async function retryGeneration(userId: string, projectId: string, id: str
     if (!changed.count)
       throw new AppError(409, 'Only failed/partial batches can retry, up to three times.');
     await tx.imageAsset.updateMany({
+      where: { generationId: id, status: 'failed' },
+      data: { status: 'pending', attempts: 0, error: null },
+    });
+    await tx.videoAsset.updateMany({
       where: { generationId: id, status: 'failed' },
       data: { status: 'pending', attempts: 0, error: null },
     });

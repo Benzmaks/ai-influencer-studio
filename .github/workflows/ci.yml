@@ -10,6 +10,7 @@ on:
         phase-3-scene-prompt-engine,
         phase-4-image-generation,
         phase-5-image-editing,
+        phase-6-video-studio,
       ]
 permissions:
   contents: read

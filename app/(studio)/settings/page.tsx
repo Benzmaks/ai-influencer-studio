@@ -60,7 +60,8 @@ export default async function Settings() {
           <h3>Provider configuration</h3>
           <p>
             Language, image and video: deterministic mocks. No paid APIs are connected. Generation
-            screens are planned.
+            previews remain fixed mock samples; video editing, extension and realistic facial motion
+            are not supported.
           </p>
           <span className="badge">Private local storage</span>
         </section>

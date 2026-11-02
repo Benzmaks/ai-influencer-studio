@@ -1,3 +1,4 @@
+import { processVideoGeneration } from './video-processor';
 import { createHash, randomUUID } from 'node:crypto';
 import { db } from '@/lib/db';
 import { requireMembership } from '@/lib/access';
@@ -15,6 +16,8 @@ export async function processGeneration(
     afterStore?: () => Promise<void>;
   } = {},
 ) {
+  const kind = await db.generation.findUnique({ where: { id }, select: { kind: true } });
+  if (kind?.kind === 'video') return processVideoGeneration(id);
   const token = randomUUID(),
     now = new Date();
   const acquired = await db.generation.updateMany({
