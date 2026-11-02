@@ -43,7 +43,7 @@ native migration preservation/redeployment/seed, audit, 67 unit tests, lint/type
 format, production build/auth and 24 desktop/mobile browser tests, now including
 actual MP4 playback. No checks were skipped.
 
-The Mac updater pins final application snapshot `9166739ad2c9ae8c14fc977a958235a7b917442d`,
+The Mac updater pins final application snapshot `5c8b0d3dd81b895f3e6a22bf1c7274e15bb0316b`,
 which also renders new video timestamps as deterministic UTC. An additional
 live private preview check verified actual desktop/mobile playback, mock poster,
 saved-board deep links, invalid-Origin rejection and a different mobile locale/
@@ -106,3 +106,14 @@ authorization coverage are unchanged. This addresses the reproduced local
 five-second timing limits without pretending the inaccessible hosted trace was
 read. The release preview pins this configuration along with the same application
 code; final native CI and a complete local run verify it before completion.
+
+
+A subsequent complete local run reproduced a separate browser-test race: 23/24
+passed, but the desktop second-generation assertion observed the first already
+completed text-to-video card before the image-to-video request had been appended.
+Accessing its intentionally null sourceReference caused a TypeError. The test
+now waits for each POST response and tracks that exact new job ID/card and
+metadata; it cannot mistake the prior completed batch for the new result. This
+fix is stronger than extending a timeout. The historical hosted trace remains
+unavailable, so it is not asserted to be the same failure. Final local and native
+runs exercise all 24 tests with the corrected request tracking.

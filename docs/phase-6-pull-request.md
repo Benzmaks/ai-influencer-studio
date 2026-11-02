@@ -32,7 +32,7 @@ Local browser regression passed 24/24 with a documented cloud timing allowance;
 additional private preview checks cover another locale/timezone and Origin
 rejection. Local WASM migration and intermittent foundation-disconnect failures
 remain explicitly documented; local SQL fixtures are not claimed as native
-migration certification. The private Monterey ZIP pins application `9166739`,
+migration certification. The private Monterey ZIP pins application `5c8b0d3`,
 backs up saved data, retains credentials/assets and applies the additive migration.
 No public preview or paid service is introduced.
 
@@ -48,3 +48,8 @@ Browser assertions now have a bounded 15-second wait for demonstrated cold-route
 and asynchronous-completion timing; the GitHub reporter exposes test-level
 annotations on future failures. All assertions and browser coverage remain.
 Final head status is linked from the branch Actions page and reported at handoff.
+
+The local rerun also exposed and fixed a concrete test race between the prior
+completed text-to-video card and the newly requested image-to-video job. Browser
+assertions now await each POST response and verify its exact job ID/card/input,
+preserving the intended source-reference check. Final CI reruns the full suite.

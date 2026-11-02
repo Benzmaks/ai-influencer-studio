@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 # Private local preview; this never uploads database contents or credentials.
-SOURCE_COMMIT='9166739ad2c9ae8c14fc977a958235a7b917442d'
+SOURCE_COMMIT='5c8b0d3dd81b895f3e6a22bf1c7274e15bb0316b'
 APP="$HOME/Downloads/AI Influencer Studio Monterey"
 PG_BIN='/Applications/Postgres.app/Contents/Versions/16/bin'
 fail(){ printf '\n%s\nPress Return to close. ' "$1"; read -r unused || true; exit 1; }
