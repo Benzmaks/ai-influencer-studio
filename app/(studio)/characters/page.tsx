@@ -1,3 +1,5 @@
+import { listDrafts } from '@/features/characters/drafts';
+import { answersSchema } from '@/features/characters/dna';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { workspace } from '@/lib/workspace';
@@ -6,6 +8,7 @@ import { CharacterCard } from '@/components/character-card';
 export default async function Characters() {
   const { user, project, canWrite } = await workspace();
   const characters = project ? await listCharacters(user.id, project.id) : [];
+  const drafts = project ? await listDrafts(user.id, project.id) : [];
   return (
     <>
       <span className="eyebrow">PERSONALITIES WITH POSSIBILITY</span>
@@ -20,6 +23,31 @@ export default async function Characters() {
           </Link>
         )}
       </div>
+      {drafts.length > 0 && (
+        <>
+          <div className="section-title">
+            <h2>Your unfinished characters</h2>
+            <span className="badge">Private drafts</span>
+          </div>
+          <div className="grid">
+            {drafts.map((d) => {
+              const a = answersSchema.parse(d.answers);
+              return (
+                <Link
+                  key={d.id}
+                  href={`/characters/new?draft=${d.id}`}
+                  className="panel draft-card"
+                >
+                  <span className="eyebrow">STEP {d.step + 1} OF 10</span>
+                  <h3>{a.displayName || a.name || 'Untitled character'}</h3>
+                  <p>{d.characterId ? 'Unsaved character update' : 'A new story in progress'}</p>
+                  <span className="text-link">Resume draft →</span>
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
       {characters.length ? (
         <>
           <div className="section-title">

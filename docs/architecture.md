@@ -79,3 +79,7 @@ Before production select the OIDC provider and deployment host, initial paid pro
 ## PR #1 compatibility review
 
 The supported default now uses the aligned Prisma 6.19.3 CLI/client native engines, with no pg adapter at runtime or in migrations. The mixed-major pg adapter 7.10.1 / Prisma 6 WASM path is a local-only, explicitly unsupported opt-in and is forbidden in production and CI. See [phase-1-review.md](phase-1-review.md) for source evidence, the migration-preservation procedure and hosted CI findings. No migration SQL, data model ownership or historical snapshots were changed by this configuration review.
+
+## Phase 2 character creator
+
+The Character module now includes the ten-step creator, private resumable drafts, deterministic mock-language orchestration and seven canonical profile documents. Existing Phase 1 services and appearance remain; basic identity updates preserve DNA. Drafts have separate optimistic revisions and transactional publication. Permanent edits append immutable versions. Scene continuity and other later modules remain planned. See [character-system.md](character-system.md), [database.md](database.md) and [phase-2-validation.md](phase-2-validation.md).

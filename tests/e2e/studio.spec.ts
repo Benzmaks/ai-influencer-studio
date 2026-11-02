@@ -26,7 +26,7 @@ test('authenticated projects, immutable character history, navigation and archiv
   await page.getByLabel('Active project').selectOption(firstProjectId);
   await expect(page.locator('#project-picker option:checked')).toHaveText(name);
 
-  await page.goto('/characters/new');
+  await page.goto('/characters/new?mode=basic');
   await page.getByLabel('Character name', { exact: true }).fill('Sofia Laurent');
   await page.getByLabel('Display name', { exact: true }).fill('Sofia');
   await page.getByLabel('Location', { exact: true }).fill('London');

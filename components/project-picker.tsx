@@ -1,5 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
 export function ProjectPicker({
@@ -45,6 +46,9 @@ export function ProjectPicker({
         </select>
         {error && <span role="alert">{error}</span>}
       </div>
+      <Link href="/projects" className="text-link">
+        Projects
+      </Link>
       <button className="button small" onClick={() => signOut({ callbackUrl: '/login' })}>
         Sign out
       </button>

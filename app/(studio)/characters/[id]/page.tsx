@@ -1,3 +1,6 @@
+import { readSnapshot } from '@/features/characters/dna';
+import { CharacterProfile } from '@/components/character-profile';
+import { DuplicateCharacter } from '@/components/duplicate-character';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { workspace } from '@/lib/workspace';
@@ -14,6 +17,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
   });
   const v = character.currentVersion;
   if (!v) notFound();
+  const dna = readSnapshot(v.snapshot);
   return (
     <>
       <Link href="/characters" className="text-link">
@@ -25,12 +29,13 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
           <p>Character identity · {project.name}</p>
         </div>
         <div className="inline">
+          {canWrite && <DuplicateCharacter projectId={project.id} id={id} />}
           {character.archivedAt ? (
             <span className="badge">Archived</span>
           ) : (
             canWrite && (
               <>
-                <Link href={`/characters/${id}/edit`} className="button primary">
+                <Link href={`/characters/${id}/${dna ? 'dna' : 'edit'}`} className="button primary">
                   Edit character
                 </Link>
                 <ArchiveButton projectId={project.id} id={id} revision={character.revision} />
@@ -67,9 +72,12 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
           </dl>
           <h3>Background</h3>
           <p className="version-summary">{v.bio || 'No background added yet.'}</p>
-          <div className="alert success">
-            Character DNA, Visual Bible and guided creation are planned for Phase 2.
-          </div>
+          {!dna && !character.archivedAt && canWrite && (
+            <Link href={`/characters/${id}/dna`} className="button primary">
+              Build Character DNA
+            </Link>
+          )}
+          {dna && <span className="badge">Canonical DNA · Version {v.versionNumber}</span>}
         </section>
         <section className="panel">
           <h2>Version history</h2>
@@ -92,12 +100,23 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
                   </p>
                   <p>{version.occupation}</p>
                   <p className="version-summary">{version.bio || 'No background'}</p>
+                  {version.id !== character.currentVersionId && readSnapshot(version.snapshot) && (
+                    <details>
+                      <summary>View historical profile</summary>
+                      <CharacterProfile snapshot={readSnapshot(version.snapshot)!} />
+                    </details>
+                  )}
                 </details>
               </li>
             ))}
           </ol>
         </section>
       </div>
+      {dna && (
+        <section className="panel" style={{ marginTop: 24 }}>
+          <CharacterProfile snapshot={dna} />
+        </section>
+      )}
     </>
   );
 }

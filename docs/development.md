@@ -86,3 +86,11 @@ The production build must use `AUTH_MODE=disabled STUDIO_PRISMA_ENGINE=classic P
 ## Recorded checks
 
 See [phase-1-validation.md](phase-1-validation.md) for the final command outcomes. The master specification remains unchanged. Do not begin Phase 2 until explicitly authorized.
+
+## Phase 2 preview
+
+See [character-system.md](character-system.md), [database.md](database.md) and [phase-2-validation.md](phase-2-validation.md). On the Phase 2 branch run db:generate and db:migrate before restarting the development server so its Prisma client includes CharacterDraft. Existing credentials and project/character data remain unchanged. CI uses the supported native path; the existing local-only experimental configuration is not a production certification.
+
+For visual review, sign in, choose Projects in the header and create/select a project, then Characters → Create character. Complete ten steps, try multiple/custom choices, Save & close and Resume draft, review Character DNA/Visual Bible and save. Edit the saved profile, inspect history, duplicate and archive. The quick identity form remains available; unimplemented non-character modules stay Planned. Mock profiles are templates, not real AI generation.
+
+The user can test on the existing Monterey setup with `tools/mac/Preview Phase 2.command` (downloadable ZIP under downloads). It takes private database/source/environment backups, downloads the pinned implementation snapshot, retains .env/local assets and restarts through the existing local starter. Do not replace the whole working folder with a fresh archive. This preview does not merge the PR, expose the app publicly or begin Phase 3. Backups/credentials must stay on the Mac.
