@@ -58,8 +58,15 @@ test('character to scene to approved image to storyboard, mock video previews an
   await page.getByRole('button', { name: 'Move shot earlier', exact: true }).click();
   await page.getByRole('button', { name: 'Save storyboard', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('immutable revision 2');
+  const selectedProjectId = await page.getByLabel('Active project').inputValue();
+  const textResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname === `/api/projects/${selectedProjectId}/videos`,
+  );
   await page.getByRole('button', { name: 'Generate mock video', exact: true }).click();
-  let batch = page.getByRole('article', { name: /Video batch/ }).first();
+  const textCreated = await (await textResponse).json();
+  let batch = page.getByRole('article', { name: `Video batch ${textCreated.id}`, exact: true });
   await expect(batch.getByText('completed · 100%', { exact: true })).toBeVisible({
     timeout: 30000,
   });
@@ -86,9 +93,10 @@ test('character to scene to approved image to storyboard, mock video previews an
   const bytes = await readFile((await download.path())!);
   expect(bytes.subarray(4, 8).toString()).toBe('ftyp');
   const projectId = await page.getByLabel('Active project').inputValue();
-  const jobs = await (await page.request.get(`/api/projects/${projectId}/videos`)).json();
-  const source = jobs[0],
-    sourceAsset = source.videoAssets[0];
+  const source = await (
+    await page.request.get(`/api/projects/${projectId}/generations/${textCreated.id}`)
+  ).json();
+  const sourceAsset = source.videoAssets[0];
   const file = await page.request.get(
     `/api/projects/${projectId}/video-assets/${sourceAsset.id}/file`,
     { headers: { Range: 'bytes=0-31' } },
@@ -100,14 +108,22 @@ test('character to scene to approved image to storyboard, mock video previews an
   const approved = page.getByLabel('Approved source image', { exact: true });
   const value = await approved.locator('option').nth(1).getAttribute('value');
   await approved.selectOption(value!);
+  const imageResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname === `/api/projects/${projectId}/videos`,
+  );
   await page.getByRole('button', { name: 'Generate mock video', exact: true }).click();
-  batch = page.getByRole('article', { name: /Video batch/ }).first();
+  const imageCreated = await (await imageResponse).json();
+  batch = page.getByRole('article', { name: `Video batch ${imageCreated.id}`, exact: true });
   await expect(batch.getByText('completed · 100%', { exact: true })).toBeVisible({
     timeout: 30000,
   });
-  const all = await (await page.request.get(`/api/projects/${projectId}/videos`)).json();
-  expect(all[0].input.sourceReference.id).toBe(value);
-  expect(all[0].input.storyboardVersion).toBe(2);
+  const imageJob = await (
+    await page.request.get(`/api/projects/${projectId}/generations/${imageCreated.id}`)
+  ).json();
+  expect(imageJob.input.sourceReference.id).toBe(value);
+  expect(imageJob.input.storyboardVersion).toBe(2);
   await page.getByLabel('Action', { exact: true }).fill('Walks slowly');
   await page.getByRole('button', { name: 'Save storyboard', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('immutable revision 3');
