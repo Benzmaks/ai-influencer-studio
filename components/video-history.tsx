@@ -159,6 +159,7 @@ export function VideoHistory({
                     <video
                       controls
                       playsInline
+                      poster="/mock-video-poster.svg"
                       preload="metadata"
                       aria-label={`Mock shot ${asset.index + 1}`}
                       src={`/api/projects/${projectId}/video-assets/${asset.id}/file`}

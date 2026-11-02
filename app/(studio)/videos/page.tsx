@@ -1,8 +1,15 @@
+import { notFound } from 'next/navigation';
+import { AppError } from '@/lib/errors';
 import Link from 'next/link';
 import { workspace } from '@/lib/workspace';
 import { listCharacters, getCharacter } from '@/features/characters/service';
 import { listScenes, getScene } from '@/features/scenes/service';
-import { listStoryboards, listVideoGenerations, approvedImages } from '@/features/videos/service';
+import {
+  getStoryboard,
+  listStoryboards,
+  listVideoGenerations,
+  approvedImages,
+} from '@/features/videos/service';
 import { providerRegistry } from '@/ai/mock';
 import { VideoStudio } from '@/components/video-studio';
 import type { BoardView, VideoJob, ApprovedImage } from '@/components/video-types';
@@ -29,17 +36,25 @@ export default async function Videos({
     listVideoGenerations(user.id, project.id),
     approvedImages(user.id, project.id),
   ]);
+  const selectedBoardId = (await searchParams).storyboard;
+  if (selectedBoardId && !boards.some((b) => b.id === selectedBoardId)) {
+    try {
+      boards.unshift(await getStoryboard(user.id, project.id, selectedBoardId));
+    } catch (e) {
+      if (e instanceof AppError && e.status === 404) notFound();
+      throw e;
+    }
+  }
   const characters = await Promise.all(
-    allCharacters
-      .filter((c) => !c.archivedAt)
-      .map(async (c) => ({
-        id: c.id,
-        name: c.name,
-        versions: (await getCharacter(user.id, project.id, c.id)).versions.map((v) => ({
-          id: v.id,
-          versionNumber: v.versionNumber,
-        })),
+    allCharacters.map(async (c) => ({
+      id: c.id,
+      name: c.name,
+      archived: !!c.archivedAt,
+      versions: (await getCharacter(user.id, project.id, c.id)).versions.map((v) => ({
+        id: v.id,
+        versionNumber: v.versionNumber,
       })),
+    })),
   );
   const scenes = await Promise.all(allScenes.map((s) => getScene(user.id, project.id, s.id)));
   return (

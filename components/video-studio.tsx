@@ -23,7 +23,7 @@ export function VideoStudio({
   initialBoardId,
 }: {
   projectId: string;
-  characters: CharacterOption[];
+  characters: (CharacterOption & { archived?: boolean })[];
   scenes: SceneOption[];
   initialBoards: BoardView[];
   initialJobs: VideoJob[];
@@ -221,6 +221,12 @@ export function VideoStudio({
           owner or editor.
         </p>
       )}
+      {character?.archived && (
+        <p className="video-notice">
+          This character is archived. Saved storyboard and video history remain available; choose an
+          active character for new work.
+        </p>
+      )}
       <section className="panel" aria-label="Storyboard editor">
         <div className="page-heading">
           <div>
@@ -293,8 +299,9 @@ export function VideoStudio({
                 }}
               >
                 {characters.map((c) => (
-                  <option value={c.id} key={c.id}>
+                  <option value={c.id} key={c.id} disabled={c.archived}>
                     {c.name}
+                    {c.archived ? ' (archived)' : ''}
                   </option>
                 ))}
               </select>
@@ -533,11 +540,19 @@ export function VideoStudio({
             </div>
           </div>
           <div className="form-actions">
-            <button className="button" onClick={() => void save('draft')}>
+            <button
+              className="button"
+              disabled={character?.archived}
+              onClick={() => void save('draft')}
+            >
               <Save size={15} />
               Save draft
             </button>
-            <button className="button primary" onClick={() => void save('ready')}>
+            <button
+              className="button primary"
+              disabled={character?.archived}
+              onClick={() => void save('ready')}
+            >
               Save storyboard
             </button>
             <span className="badge">
@@ -700,6 +715,7 @@ export function VideoStudio({
             className="button primary"
             disabled={
               !revisionId ||
+              character?.archived ||
               dirty ||
               pending ||
               (mode === 'image-to-video' && !sourceImageId) ||

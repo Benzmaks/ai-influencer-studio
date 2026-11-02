@@ -70,6 +70,15 @@ test('character to scene to approved image to storyboard, mock video previews an
     .poll(() => playback.evaluate((v) => (v as HTMLVideoElement).readyState), { timeout: 15000 })
     .toBeGreaterThanOrEqual(1);
   expect(await playback.evaluate((v) => (v as HTMLVideoElement).duration)).toBeCloseTo(2, 1);
+  await playback.evaluate(async (v) => {
+    const clip = v as HTMLVideoElement;
+    clip.muted = true;
+    await clip.play();
+  });
+  await expect
+    .poll(() => playback.evaluate((v) => (v as HTMLVideoElement).currentTime), { timeout: 15000 })
+    .toBeGreaterThan(0);
+  await playback.evaluate((v) => (v as HTMLVideoElement).pause());
   const downloadEvent = page.waitForEvent('download');
   await batch.getByRole('link', { name: 'Download shot 1', exact: true }).click();
   const download = await downloadEvent;

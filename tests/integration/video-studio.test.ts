@@ -3,6 +3,7 @@ import { randomUUID, createHash } from 'node:crypto';
 import { beforeAll, afterAll, it, expect } from 'vitest';
 import { Queue, Worker } from 'bullmq';
 import { db } from '@/lib/db';
+import { archiveCharacter } from '@/features/characters/service';
 import { createProject } from '@/features/projects/service';
 import { saveDraft, publishDraft } from '@/features/characters/drafts';
 import { defaultAnswers } from '@/features/characters/dna';
@@ -497,3 +498,23 @@ it('recovers a real killed video worker without duplicating committed clips', as
     await queue.close();
   }
 }, 65000);
+
+it('retains storyboard and downloadable video history when the canonical character is archived', async () => {
+  const b = await board(),
+    j = await createVideoGeneration(owner, projectId, request(b.versions[0].id), randomUUID());
+  await processVideoGeneration(j.id);
+  const done = await getGeneration(owner, projectId, j.id),
+    before = await readVideoAsset(viewer, projectId, done.videoAssets[0].id);
+  const c = await db.characterVersion.findUniqueOrThrow({
+    where: { id: characterVersionId },
+    include: { character: true },
+  });
+  await archiveCharacter(owner, projectId, c.characterId, c.character.revision);
+  expect(await getStoryboard(viewer, projectId, b.id)).toEqual(b);
+  expect((await readVideoAsset(viewer, projectId, done.videoAssets[0].id)).bytes).toEqual(
+    before.bytes,
+  );
+  await expect(
+    createVideoGeneration(owner, projectId, request(b.versions[0].id), randomUUID()),
+  ).rejects.toMatchObject({ status: 409 });
+});
