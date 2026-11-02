@@ -7,7 +7,12 @@ export function CharacterCard({
     name: string;
     revision: number;
     archivedAt: Date | null;
-    currentVersion: { displayName: string; occupation: string; location: string } | null;
+    currentVersion: {
+      versionNumber: number;
+      displayName: string;
+      occupation: string;
+      location: string;
+    } | null;
   };
 }) {
   return (
@@ -23,7 +28,7 @@ export function CharacterCard({
         <p>{character.currentVersion?.occupation || 'A story waiting to unfold'}</p>
         <div className="card-bottom">
           <span>{character.currentVersion?.location || 'Location undefined'}</span>
-          <span>VERSION {character.revision} ↗</span>
+          <span>VERSION {character.currentVersion?.versionNumber ?? character.revision} ↗</span>
         </div>
       </div>
     </Link>

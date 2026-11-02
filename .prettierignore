@@ -6,3 +6,5 @@ docs/product-specification.md
 *.mp4
 playwright-report
 test-results
+
+next-env.d.ts

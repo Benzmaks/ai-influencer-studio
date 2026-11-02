@@ -1,0 +1,77 @@
+name: Phase 1 checks
+on:
+  pull_request:
+  push:
+    branches: [main, phase-1-foundation]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.6-bookworm
+        env:
+          POSTGRES_USER: studio
+          POSTGRES_PASSWORD: ci-only-database
+          POSTGRES_DB: studio
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U studio -d studio"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4.6-bookworm
+        ports: [6379:6379]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://studio:ci-only-database@localhost:5432/studio?schema=public
+      REDIS_URL: redis://localhost:6379
+      AUTH_URL: http://localhost:3000
+      AUTH_MODE: development
+      LANGUAGE_PROVIDER: mock
+      IMAGE_PROVIDER: mock
+      VIDEO_PROVIDER: mock
+      STORAGE_DRIVER: local
+      LOCAL_STORAGE_DIR: .local/assets
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Create ephemeral test-only credentials
+        run: |
+          node --input-type=module <<'JS'
+          import {appendFileSync} from 'node:fs';
+          import {randomBytes} from 'node:crypto';
+          const values={AUTH_SECRET:randomBytes(32).toString('hex'),DEV_AUTH_EMAIL:'ci@example.test',DEV_AUTH_PASSWORD:randomBytes(18).toString('hex')};
+          for(const [name,value] of Object.entries(values)){console.log(`::add-mask::${value}`);appendFileSync(process.env.GITHUB_ENV,`${name}=${value}\n`);}
+          JS
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run db:migrate
+      - run: npm run db:migrate
+      - run: npm run db:seed
+      - run: npm run db:seed
+      - run: npm run health
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run test:integration
+      - run: npm run build
+        env:
+          AUTH_MODE: disabled
+      - run: npm run test:production
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-traces
+          path: test-results/
+          retention-days: 7
