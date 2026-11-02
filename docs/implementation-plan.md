@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: Phase 1 was explicitly authorized and is implemented on `phase-1-foundation`; see [development.md](development.md) and [phase-1-validation.md](phase-1-validation.md). Later phases are plans, not implemented features. The master requirements are in [product-specification.md](product-specification.md); architecture and persistence contracts are in [architecture.md](architecture.md) and [data-model.md](data-model.md).
+Status: Phase 1 was explicitly authorized and is implemented on `phase-1-foundation`; see [development.md](development.md) and [phase-1-validation.md](phase-1-validation.md). Phase 2 is implemented for review on phase-2-character-dna; see phase-2-validation.md. Phases 3–9 remain plans. The master requirements are in [product-specification.md](product-specification.md); architecture and persistence contracts are in [architecture.md](architecture.md) and [data-model.md](data-model.md).
 
 ## Shared completion gate
 

@@ -67,3 +67,7 @@ Index project plus common filters: resource status/created_at, character and sce
 ## Phase 1 persistence notes
 
 Auth.js credentials use JWT sessions; Account/Session/VerificationToken tables are integration foundations and are not populated by credentials login. CharacterVersion currently stores basic identity fields and a schema-versioned identity JSON snapshot; full DNA/Visual Bible/Brand/Realism/Social Voice fields arrive in Phase 2. A PostgreSQL rewrite rule blocks version updates. App operations archive instead of deleting characters; administrative database deletion is outside the user-facing API. Composite foreign keys constrain current-version ownership. Role changes and permanent character edits create audit rows. Scene/generation/asset history tables are not yet implemented.
+
+## Phase 2 additions
+
+CharacterDraft is implemented with private creator/project scope, optional target/base revision, bounded wizard state, optimistic revision and completion state. Publication is transactional and pins the complete schema-version-2 canonical snapshot. No original migration or schema-version-1 row was rewritten. See [database.md](database.md) and [character-system.md](character-system.md).
