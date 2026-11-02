@@ -2,11 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
 const modules: Record<string, [string, string, string]> = {
-  videos: [
-    'Videos',
-    'Bring your world to life.',
-    'Storyboards, image-to-video and capability-aware video tools.',
-  ],
   content: [
     'Content',
     'Find your character’s voice.',
