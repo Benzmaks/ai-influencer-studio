@@ -43,7 +43,7 @@ native migration preservation/redeployment/seed, audit, 67 unit tests, lint/type
 format, production build/auth and 24 desktop/mobile browser tests, now including
 actual MP4 playback. No checks were skipped.
 
-The Mac updater pins final application snapshot `4545360e784ce17e169678824bf84a324bd3989d`,
+The Mac updater pins final application snapshot `9166739ad2c9ae8c14fc977a958235a7b917442d`,
 which also renders new video timestamps as deterministic UTC. An additional
 live private preview check verified actual desktop/mobile playback, mock poster,
 saved-board deep links, invalid-Origin rejection and a different mobile locale/
@@ -86,3 +86,23 @@ The mock explicitly cannot validate real facial movement or produce different
 footage from different prompts/seeds/images. No end-user cloud port-preview tool
 is available in this environment; the private Mac updater is the visual preview
 route. Cloud loopback is used for automated browser verification.
+
+
+## Browser timing and diagnostics follow-up
+
+The later metadata run on `5f7708a` failed in Node 22's browser step:
+https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41447435239 .
+GitHub's public annotation exposed the failed step, but detailed logs/artifact
+API access returned Forbidden, so its exact failing assertion is not claimed
+as diagnosed. The next unchanged-application run on `7ed7bbe` passed both full
+native matrices in 7m 42s:
+https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41447653532 .
+
+The committed browser configuration now uses a bounded 15-second assertion
+wait, matching the successful local allowance for observed cold-route/async
+completion delays, and adds the GitHub reporter in CI so future failures expose
+test-level annotations. Assertions, test count, browser projects and recovery/
+authorization coverage are unchanged. This addresses the reproduced local
+five-second timing limits without pretending the inaccessible hosted trace was
+read. The release preview pins this configuration along with the same application
+code; final native CI and a complete local run verify it before completion.

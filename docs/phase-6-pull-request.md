@@ -32,10 +32,19 @@ Local browser regression passed 24/24 with a documented cloud timing allowance;
 additional private preview checks cover another locale/timezone and Origin
 rejection. Local WASM migration and intermittent foundation-disconnect failures
 remain explicitly documented; local SQL fixtures are not claimed as native
-migration certification. The private Monterey ZIP pins application `4545360`,
+migration certification. The private Monterey ZIP pins application `9166739`,
 backs up saved data, retains credentials/assets and applies the additive migration.
 No public preview or paid service is introduced.
 
 See `docs/video-generation.md` for capability boundaries and `docs/development.md`
 for the private Monterey preview. Review only; do not merge automatically or
 begin Phase 7.
+
+
+CI follow-up: a later Node 22 browser step failed without accessible detailed
+logs; the next full native matrix passed on the unchanged application:
+https://github.com/Benzmaks/ai-influencer-studio/actions/runs/41447653532 .
+Browser assertions now have a bounded 15-second wait for demonstrated cold-route
+and asynchronous-completion timing; the GitHub reporter exposes test-level
+annotations on future failures. All assertions and browser coverage remain.
+Final head status is linked from the branch Actions page and reported at handoff.

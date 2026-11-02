@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 # Private local preview; this never uploads database contents or credentials.
-SOURCE_COMMIT='4545360e784ce17e169678824bf84a324bd3989d'
+SOURCE_COMMIT='9166739ad2c9ae8c14fc977a958235a7b917442d'
 APP="$HOME/Downloads/AI Influencer Studio Monterey"
 PG_BIN='/Applications/Postgres.app/Contents/Versions/16/bin'
 fail(){ printf '\n%s\nPress Return to close. ' "$1"; read -r unused || true; exit 1; }
@@ -32,7 +32,7 @@ tar --exclude='./node_modules' --exclude='./.next' --exclude='./.local' -czf "$B
 chmod 600 "$BACKUP/database.dump" "$BACKUP/private-environment.env" "$BACKUP/source.tgz"
 WORK=$(mktemp -d "$APP/.local/phase6-download-XXXXXX")
 trap 'rm -rf "$WORK"' EXIT
-printf '\nDownloading the reviewed Phase 6 source snapshot…\n'
+printf '\nDownloading the pinned Phase 6 source snapshot…\n'
 curl --fail --location --proto '=https' --tlsv1.2 -o "$WORK/source.zip" "https://github.com/Benzmaks/ai-influencer-studio/archive/$SOURCE_COMMIT.zip"
 ditto -x -k "$WORK/source.zip" "$WORK"
 NEW="$WORK/ai-influencer-studio-$SOURCE_COMMIT"
