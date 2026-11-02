@@ -122,3 +122,11 @@ Visual flow: create Character → photography Scene → Generate mock images →
 The cloud machine cannot run the supported native migration engine. Local Phase 5 browser/integration checks therefore use a separately created private SQL-backed database with the exact migration SQL, leaving the previous studio database intact. This is explicitly not a Prisma migration deployment: hosted CI verifies native fresh/populated/repeated migrations. Do not use that local test setup as production migration evidence. Normal worker processes must be stopped during integration recovery/fault-injection tests, as in Phase 4. No real/paid provider has been added.
 
 For the existing Monterey installation, [download the Phase 5 updater](https://github.com/Benzmaks/ai-influencer-studio/raw/refs/heads/phase-5-image-editing/downloads/Phase-5-Monterey-Preview.zip), extract it in Downloads and run `/bin/bash "$HOME/Downloads/Phase 5 Preview/Preview Phase 5.command"`. It reuses your private Redis/worker setup, retains the foundation-launcher root fix, backs up data and applies native migrations without replacing your credentials or originals. Actual physical Mac execution remains a user preview check.
+
+Phase 5 security maintenance: see [security-maintenance.md](security-maintenance.md).
+Use a fresh updater download to receive the patched dependencies. Locked npm
+installation runs a hash-guarded compatibility bridge for the existing lint
+plugins; do not disable lifecycle scripts during normal setup. Run
+`npm run audit:dependencies` to check current advisories. Full and production-only
+audits reported zero findings after remediation. Node 22's intentional preview
+engine notice and ESLint 9's maintenance notice are separate from vulnerabilities.

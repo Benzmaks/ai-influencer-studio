@@ -11,3 +11,10 @@ Validation: locked install; 57 unit tests (also Node 22); SQL-backed local 36-te
 A source-pinned private Monterey updater backs up existing data, preserves credentials/assets and reuses Redis/worker launchers including the Phase 4 root fix. Physical Mac execution/restore remains unverified here. See docs/development.md and docs/image-editing.md.
 
 Review only. Do not merge automatically or start Phase 6.
+
+Security follow-up: resolves the 19 reported dependency-path findings with
+integrity-locked deepmerge-ts 8.0.0 and minimatch 11.0.1 overrides, a guarded
+lint-only compatibility bridge and security regression tests. Adds a mandatory
+moderate-or-higher audit gate and full native CI on Node 24 and Monterey's Node
+22 preview version. No schema/data migration changes or real providers.
+See docs/security-maintenance.md for compatibility tradeoffs and final evidence.

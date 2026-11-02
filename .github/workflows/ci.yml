@@ -17,6 +17,10 @@ jobs:
   validate:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['24.19.0', '22.23.4']
     services:
       postgres:
         image: postgres:17.6-bookworm
@@ -51,7 +55,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version-file: .nvmrc
+          node-version: ${{ matrix.node }}
           cache: npm
       - name: Create ephemeral test-only credentials
         run: |
@@ -62,6 +66,7 @@ jobs:
           for(const [name,value] of Object.entries(values)){console.log(`::add-mask::${value}`);appendFileSync(process.env.GITHUB_ENV,`${name}=${value}\n`);}
           JS
       - run: npm ci
+      - run: npm run audit:dependencies
       - run: npm run db:generate
       - run: npm run db:migrate
       - run: npm run db:migrate
@@ -88,6 +93,6 @@ jobs:
       - uses: actions/upload-artifact@v5
         if: failure()
         with:
-          name: browser-failure-traces
+          name: browser-failure-traces-node-${{ matrix.node }}
           path: test-results/
           retention-days: 7
