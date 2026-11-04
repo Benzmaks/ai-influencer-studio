@@ -11,6 +11,8 @@
 | Start a normal implementation task | [Architecture-essentials.md](Architecture-essentials.md) then the relevant source files |
 | Instructions applying to files in this directory | [AGENTS.md](AGENTS.md) |
 | Prepare a Codex work request / acceptance checklist | [codex.md](codex.md) |
+| Apply the approved ultra-fine skin realism visual benchmark | [Ultra-Fine-Skin-Realism-DNA.md](Ultra-Fine-Skin-Realism-DNA.md) |
+| Use the approved café-smile highlight-resilient DNA preset | [DNA-Library/Cafe-Smile-Highlight-Resilient.md](DNA-Library/Cafe-Smile-Highlight-Resilient.md) |
 | Temporary scratch space | [scratchpad.md](scratchpad.md) (intentionally empty) |
 
 **Order of authority:** explicit task request → repository/root `AGENTS.md` and other applicable instructions → approved technical decisions/source code → these draft V2 notes. If documents conflict with current code, inspect code and report the difference rather than silently inventing a migration.
