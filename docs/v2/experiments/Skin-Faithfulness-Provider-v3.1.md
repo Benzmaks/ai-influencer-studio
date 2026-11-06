@@ -12,7 +12,7 @@ All tests begin from the same frozen original. Preserve locked facial identity, 
 
 ## Provider contract
 - Supply original source as input 1, plus a PNG mask where **alpha 0 is editable**.
-- If exact output dimensions are unsupported, pad original and mask to multiples of 16 on bottom/right using alpha=255 (not editable). Request exact padded size and crop back without geometric scaling. Reject any provider output of unexpected size.
+- If exact output dimensions are unsupported, use an unscaled native 1024 × 1024 facial tile (source bounds x=48..1072, y=64..1088). The original image is 1122 × 1402 and is never resized. Generate an edited 1024 × 1024 tile, paste it back at the original tile location, then composite only approved editable pixels onto the full frozen source. Reject any provider output of unexpected size.
 - A masked-edit API can treat masks as guidance and may alter unmasked pixels. Always post-composite candidate with frozen source outside edit region.
 - A provider edit is **not** a successful repair until a human reviews native-resolution skin and makeup.
 
